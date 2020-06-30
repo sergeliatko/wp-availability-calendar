@@ -17,6 +17,7 @@ class Core {
 	protected const DEFAULT_BOOKING_WINDOW  = 365;
 	protected const DEFAULT_MIN_STAY        = 1;
 	protected const DEFAULT_MAX_STAY        = 180;
+	protected const DEFAULT_SHOW_RATES      = 'show-rates';
 
 	/**
 	 * @var array|array[] $instances
@@ -117,9 +118,10 @@ class Core {
 	public function getCalendarParameters(): array {
 		if ( !is_array( $this->calendar_parameters ) ) {
 			$this->setCalendarParameters(
-				array_intersect_key(
+			//use everything except for standard html attributes
+				array_diff_key(
 					$this->getParameters(),
-					$this->getAllowedCalendarParameters()
+					array( 'html-attrs' )
 				)
 			);
 		}
@@ -170,27 +172,6 @@ class Core {
 	}
 
 	/**
-	 * @return array
-	 */
-	protected function getAllowedCalendarParameters(): array {
-		$keys = array(
-			'instance',
-			'arrival-id',
-			'arrival-display-id',
-			'departure-id',
-			'departure-display-id',
-			'date-format',
-			'display-date-format',
-			'first-date',
-			'last-date',
-			'min-stay',
-			'max-stay',
-		);
-
-		return array_combine( $keys, $keys );
-	}
-
-	/**
 	 * @return array|array[]
 	 */
 	protected function getAvailability(): array {
@@ -218,24 +199,24 @@ class Core {
 	 * @return array
 	 */
 	protected function getDefaultParameters( array $parameters = array() ): array {
-		$user_date_format = empty( $parameters['date-format'] ) ?
-			self::DEFAULT_DATE_FORMAT
-			: $parameters['date-format'];
+		$user_date_format = $this->getUserDateFormat( $parameters );
 		$defaults         = array(
 			'html-attrs'           => array(
 				'id'    => $this->getCalendarHtmlId(),
 				'class' => $this->getName(),
 			),
 			'arrival-id'           => $this->getArrivalHtmlId(),
-			'arrival-display-id'   => $this->getArrivalDisplayHtmlId(),
-			'departure-id'         => $this->getDepartureHtmlId(),
-			'departure-display-id' => $this->getDepartureDisplayHtmlId(),
+			'arrival-id-display'   => $this->getArrivalDisplayHtmlId(),
 			'date-format'          => self::PHPDateFormatToJSDatePicker( $user_date_format ),
-			'display-date-format'  => self::PHPDateFormatToJSDatePicker( get_option( 'date_format', self::DEFAULT_DATE_FORMAT ) ),
+			'date-format-display'  => self::PHPDateFormatToJSDatePicker( get_option( 'date_format', $user_date_format ) ),
+			'departure-id'         => $this->getDepartureHtmlId(),
+			'departure-id-display' => $this->getDepartureDisplayHtmlId(),
 			'first-date'           => $this->getFirstDate( $user_date_format ),
 			'last-date'            => $this->getLastDate( $user_date_format ),
-			'min-stay'             => self::DEFAULT_MIN_STAY,
 			'max-stay'             => self::DEFAULT_MAX_STAY,
+			'min-stay'             => self::DEFAULT_MIN_STAY,
+			'show-rates'           => self::DEFAULT_SHOW_RATES,
+			'week-start'           => absint( get_option( 'start_of_week', 0 ) ),
 		);
 
 		/**
@@ -340,6 +321,15 @@ class Core {
 	 */
 	protected function getCalendarHtmlId(): string {
 		return $this->toHtmlId();
+	}
+
+	/**
+	 * @param array $parameters
+	 *
+	 * @return string
+	 */
+	protected function getUserDateFormat( array $parameters = array() ): string {
+		return empty( $parameters['date-format'] ) ? self::DEFAULT_DATE_FORMAT : $parameters['date-format'];
 	}
 
 }
