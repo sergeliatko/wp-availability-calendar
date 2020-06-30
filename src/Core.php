@@ -9,7 +9,7 @@ namespace SergeLiatko\WPAvailabilityCalendar;
  * @package SergeLiatko\WPAvailabilityCalendar
  */
 class Core {
-	use DateFormatTranslateTrait, IsEmptyTrait, ParseArgsRecursiveTrait;
+	use DateFormatTranslateTrait, HTMLTagTrait, IsEmptyTrait, ParseArgsRecursiveTrait;
 
 	protected const NAME                    = 'availability-calendar';
 	protected const DEFAULT_DATE_FORMAT     = 'Y-m-d';
@@ -18,6 +18,7 @@ class Core {
 	protected const DEFAULT_MIN_STAY        = 1;
 	protected const DEFAULT_MAX_STAY        = 180;
 	protected const DEFAULT_SHOW_RATES      = 'show-rates';
+	protected const XHTML                   = false;
 
 	/**
 	 * @var array|array[] $instances
@@ -40,17 +41,14 @@ class Core {
 	protected $parameters;
 
 	/**
-	 * @var array $calendar_parameters
-	 */
-	protected $calendar_parameters;
-
-	/**
 	 * Core constructor.
 	 *
 	 * @param array|null $availability
 	 * @param array|null $parameters
 	 */
 	public function __construct( ?array $availability = null, ?array $parameters = null ) {
+		$this->setTag( 'div' );
+		$this->setSelfClosing( false );
 		$this->setAvailability( (array) $availability );
 		$this->setParameters( (array) $parameters );
 		$this->addInstance( array(
@@ -115,34 +113,6 @@ class Core {
 	/**
 	 * @return array
 	 */
-	public function getCalendarParameters(): array {
-		if ( !is_array( $this->calendar_parameters ) ) {
-			$this->setCalendarParameters(
-			//use everything except for standard html attributes
-				array_diff_key(
-					$this->getParameters(),
-					array( 'html-attrs' )
-				)
-			);
-		}
-
-		return $this->calendar_parameters;
-	}
-
-	/**
-	 * @param array $calendar_parameters
-	 *
-	 * @return Core
-	 */
-	public function setCalendarParameters( array $calendar_parameters ): Core {
-		$this->calendar_parameters = $calendar_parameters;
-
-		return $this;
-	}
-
-	/**
-	 * @return array
-	 */
 	protected function getParameters(): array {
 		if ( !is_array( $this->parameters ) ) {
 			$this->setParameters( array() );
@@ -159,13 +129,7 @@ class Core {
 	protected function setParameters( array $parameters ): Core {
 		$this->parameters = self::parseArgsRecursive(
 			$parameters,
-			//add instance number without the ability to overwrite it via the default parameters filter
-			array_merge(
-				$this->getDefaultParameters( $parameters ),
-				array(
-					'instance' => $this->getInstanceNumber(),
-				)
-			)
+			$this->getDefaultParameters( $parameters )
 		);
 
 		return $this;
@@ -194,6 +158,27 @@ class Core {
 	}
 
 	/**
+	 * @return array
+	 */
+	protected function getCalendarParameters(): array {
+		return array_diff_key(
+			$this->getParameters(),
+			array( 'html_attrs' )
+		);
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getHtmlAttributes(): array {
+		return array_intersect_key(
+			$this->getParameters(),
+			array( 'html_attrs' )
+		);
+	}
+
+
+	/**
 	 * @param array $parameters
 	 *
 	 * @return array
@@ -201,22 +186,24 @@ class Core {
 	protected function getDefaultParameters( array $parameters = array() ): array {
 		$user_date_format = $this->getUserDateFormat( $parameters );
 		$defaults         = array(
-			'html-attrs'           => array(
-				'id'    => $this->getCalendarHtmlId(),
-				'class' => $this->getName(),
+			'html_attrs'         => array(
+				'id'            => $this->getCalendarHtmlId(),
+				'class'         => $this->getName(),
+				//do not overwrite this attribute, unless you know what you're doing
+				'data-instance' => $this->getInstanceNumber(),
 			),
-			'arrival-id'           => $this->getArrivalHtmlId(),
-			'arrival-id-display'   => $this->getArrivalDisplayHtmlId(),
-			'date-format'          => self::PHPDateFormatToJSDatePicker( $user_date_format ),
-			'date-format-display'  => self::PHPDateFormatToJSDatePicker( get_option( 'date_format', $user_date_format ) ),
-			'departure-id'         => $this->getDepartureHtmlId(),
-			'departure-id-display' => $this->getDepartureDisplayHtmlId(),
-			'first-date'           => $this->getFirstDate( $user_date_format ),
-			'last-date'            => $this->getLastDate( $user_date_format ),
-			'max-stay'             => self::DEFAULT_MAX_STAY,
-			'min-stay'             => self::DEFAULT_MIN_STAY,
-			'show-rates'           => self::DEFAULT_SHOW_RATES,
-			'week-start'           => absint( get_option( 'start_of_week', 0 ) ),
+			'arrivalId'          => $this->getArrivalHtmlId(),
+			'arrivalIdDisplay'   => $this->getArrivalDisplayHtmlId(),
+			'dateFormat'         => self::PHPDateFormatToJSDatePicker( $user_date_format ),
+			'dateFormatDisplay'  => self::PHPDateFormatToJSDatePicker( get_option( 'date_format', $user_date_format ) ),
+			'departureId'        => $this->getDepartureHtmlId(),
+			'departureIdDisplay' => $this->getDepartureDisplayHtmlId(),
+			'firstDate'          => $this->getFirstDate( $user_date_format ),
+			'lastDate'           => $this->getLastDate( $user_date_format ),
+			'maxStay'            => self::DEFAULT_MAX_STAY,
+			'minStay'            => self::DEFAULT_MIN_STAY,
+			'showRates'          => self::DEFAULT_SHOW_RATES,
+			'weekStart'          => absint( get_option( 'start_of_week', 0 ) ),
 		);
 
 		/**
@@ -228,7 +215,12 @@ class Core {
 		 * @param array                                    $parameters
 		 * @param \SergeLiatko\WPAvailabilityCalendar\Core $this
 		 */
-		return apply_filters( 'availability_calendar_default_params', $defaults, $parameters, $this );
+		return apply_filters(
+			'availability_calendar_default_params',
+			$defaults,
+			$parameters,
+			$this
+		);
 	}
 
 	/**
@@ -241,6 +233,10 @@ class Core {
 			self::isEmpty( $dates = $this->getAvailability() )
 			|| empty( $dates[0]['date'] )
 		) {
+			if ( empty( self::DEFAULT_DAYS_IN_ADVANCE ) ) {
+				return date( $format, strtotime( 'today' ) );
+			}
+
 			return date(
 				$format,
 				strtotime( sprintf( '+%1$d day', self::DEFAULT_DAYS_IN_ADVANCE ) )
@@ -261,6 +257,10 @@ class Core {
 			|| self::isEmpty( $count = count( $dates ) )
 			|| empty( $dates[ ( $count - 1 ) ]['date'] )
 		) {
+			if ( empty( self::DEFAULT_BOOKING_WINDOW ) ) {
+				return date( $format, strtotime( 'today' ) );
+			}
+
 			return date(
 				$format,
 				strtotime( sprintf( '+%1$d day', self::DEFAULT_BOOKING_WINDOW ) )
