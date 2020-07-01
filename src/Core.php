@@ -9,10 +9,11 @@ namespace SergeLiatko\WPAvailabilityCalendar;
  * @package SergeLiatko\WPAvailabilityCalendar
  */
 class Core {
-	use DateFormatTranslateTrait, HTMLTagTrait, IsEmptyTrait, ParseArgsRecursiveTrait;
+	use DateFormatTranslateTrait, HTMLTagTrait, IsEmptyTrait, ParseArgsRecursiveTrait, ScriptsTrait;
 
+	public const    DEFAULT_DATE_FORMAT     = 'Y-m-d';
 	protected const NAME                    = 'availability-calendar';
-	protected const DEFAULT_DATE_FORMAT     = 'Y-m-d';
+	protected const SCRIPTS_HANDLE          = 'availability-calendar';
 	protected const DEFAULT_DAYS_IN_ADVANCE = 0;
 	protected const DEFAULT_BOOKING_WINDOW  = 365;
 	protected const DEFAULT_MIN_STAY        = 1;
@@ -55,6 +56,71 @@ class Core {
 			'parameters'   => $this->getCalendarParameters(),
 			'availability' => $this->getAvailability(),
 		) );
+	}
+
+	/**
+	 * Adds instances as javascript variable in WP.
+	 */
+	public static function localizeScripts(): void {
+		wp_localize_script(
+			self::SCRIPTS_HANDLE,
+			'availabilityCalendar',
+			array(
+				'calendars' => self::getInstances(),
+				'messages'  => array(),
+			)
+		);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected static function defaultScripts(): array {
+		return array(
+			'css' => array(
+				array(
+					self::SCRIPTS_HANDLE,
+					self::maybeMinify( self::pathToUrl(
+						dirname( __FILE__, 2 ) . '/includes/css/availability-calendar.css'
+					) ),
+					array(),
+					null,
+					'all',
+				),
+			),
+			'js'  => array(
+				array(
+					self::SCRIPTS_HANDLE,
+					self::maybeMinify( self::pathToUrl(
+						dirname( __FILE__, 2 ) . '/includes/js/availability-calendar.js'
+					) ),
+					array( 'jquery-ui-datepicker' ),
+					null,
+					true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected static function setScriptsEnqueued( bool $scripts_enqueued ): void {
+		if ( $scripts_enqueued ) {
+			$hook = is_admin() ? 'admin_print_footer_scripts' : 'wp_print_footer_scripts';
+			add_action( $hook, array( 'SergeLiatko\WPAvailabilityCalendar\Core', 'localizeScripts' ), 0, 0 );
+		}
+		self::$scripts_enqueued = $scripts_enqueued;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function __toString(): string {
+		self::maybeEnqueueScripts();
+
+		return $this->toHTML();
 	}
 
 	/**
@@ -147,12 +213,23 @@ class Core {
 	}
 
 	/**
-	 * @param array|array[] $availability
+	 * @param \SergeLiatko\WPAvailabilityCalendar\AvailabilityInterface[] $availability
 	 *
 	 * @return Core
 	 */
 	protected function setAvailability( array $availability ): Core {
-		$this->availability = $availability;
+		$availability = array_filter( $availability, function ( object $date ) {
+			return in_array(
+				'SergeLiatko\WPAvailabilityCalendar\AvailabilityInterface',
+				class_implements( get_class( $date ) )
+			);
+		} );
+		$dates        = array();
+		/** @var \SergeLiatko\WPAvailabilityCalendar\AvailabilityInterface $date */
+		foreach ( $availability as $date ) {
+			$dates[ $date->getDate() ] = $date->__toArray();
+		}
+		$this->availability = $dates;
 
 		return $this;
 	}
@@ -163,7 +240,7 @@ class Core {
 	protected function getCalendarParameters(): array {
 		return array_diff_key(
 			$this->getParameters(),
-			array( 'html_attrs' )
+			array( 'html_attrs' => 'html_attrs' )
 		);
 	}
 
@@ -171,10 +248,12 @@ class Core {
 	 * @return array
 	 */
 	protected function getHtmlAttributes(): array {
-		return array_intersect_key(
+		$data = array_intersect_key(
 			$this->getParameters(),
-			array( 'html_attrs' )
+			array( 'html_attrs' => 'html_attrs' )
 		);
+
+		return array_pop( $data );
 	}
 
 
@@ -231,7 +310,8 @@ class Core {
 	protected function getFirstDate( string $format = self::DEFAULT_DATE_FORMAT ): string {
 		if (
 			self::isEmpty( $dates = $this->getAvailability() )
-			|| empty( $dates[0]['date'] )
+			|| self::isEmpty( $first = array_shift( $dates ) )
+			|| empty( $first['date'] )
 		) {
 			if ( empty( self::DEFAULT_DAYS_IN_ADVANCE ) ) {
 				return date( $format, strtotime( 'today' ) );
@@ -243,7 +323,7 @@ class Core {
 			);
 		}
 
-		return empty( $dates[0]['date'] );
+		return $first['date'];
 	}
 
 	/**
@@ -254,11 +334,12 @@ class Core {
 	protected function getLastDate( string $format = self::DEFAULT_DATE_FORMAT ): string {
 		if (
 			self::isEmpty( $dates = $this->getAvailability() )
-			|| self::isEmpty( $count = count( $dates ) )
-			|| empty( $dates[ ( $count - 1 ) ]['date'] )
+			|| self::isEmpty( $last = array_pop( $dates ) )
+			|| empty( $last['date'] )
 		) {
 			if ( empty( self::DEFAULT_BOOKING_WINDOW ) ) {
-				return date( $format, strtotime( 'today' ) );
+				//return empty string as 0 is no limit
+				return '';
 			}
 
 			return date(
@@ -267,7 +348,7 @@ class Core {
 			);
 		}
 
-		return empty( $dates[ ( $count - 1 ) ]['date'] );
+		return $last['date'];
 	}
 
 	/**

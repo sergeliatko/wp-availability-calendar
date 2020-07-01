@@ -81,7 +81,7 @@ trait HTMLTagTrait {
 	 *
 	 * @return HTMLTagTrait
 	 */
-	protected function setSelfClosing( bool $self_closing ): HTMLTagTrait {
+	protected function setSelfClosing( bool $self_closing ) {
 		$this->self_closing = $self_closing;
 
 		return $this;
@@ -99,7 +99,7 @@ trait HTMLTagTrait {
 	 *
 	 * @return HTMLTagTrait
 	 */
-	protected function setTag( string $tag ): HTMLTagTrait {
+	protected function setTag( string $tag ) {
 		$this->tag = $tag;
 
 		return $this;
@@ -128,7 +128,7 @@ trait HTMLTagTrait {
 	 *
 	 * @return HTMLTagTrait
 	 */
-	public function setContent( string $content ): HTMLTagTrait {
+	public function setContent( string $content ) {
 		$this->content = $content;
 
 		return $this;
@@ -159,7 +159,7 @@ trait HTMLTagTrait {
 	 * @return HTMLTagTrait
 	 * @noinspection PhpUnused
 	 */
-	protected function setHtmlAttributes( array $html_attributes ): HTMLTagTrait {
+	protected function setHtmlAttributes( array $html_attributes ) {
 		$this->html_attributes = $html_attributes;
 
 		return $this;
