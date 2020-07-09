@@ -348,7 +348,15 @@ class Core {
 			);
 		}
 
-		return $last['date'];
+		$max_stay = empty( $last['maxStay'] ) ? self::DEFAULT_MAX_STAY : $last['maxStay'];
+
+		return date(
+			$format,
+			strtotime(
+				sprintf( '+%1$d day', $max_stay ),
+				date_create_from_format( $format, $last['date'] )->format( 'U' )
+			)
+		);
 	}
 
 	/**
