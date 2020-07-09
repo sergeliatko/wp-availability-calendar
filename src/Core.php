@@ -18,7 +18,7 @@ class Core {
 	protected const DEFAULT_BOOKING_WINDOW  = 365;
 	protected const DEFAULT_MIN_STAY        = 1;
 	protected const DEFAULT_MAX_STAY        = 180;
-	protected const DEFAULT_SHOW_RATES      = 'show-rates';
+	protected const DEFAULT_SHOW_RATES      = true;
 	protected const XHTML                   = false;
 
 	/**
