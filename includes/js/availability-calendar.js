@@ -287,14 +287,16 @@ jQuery(document).ready(function ($) {
         //initiate arrival and departure selected dates
         let selectedArrival = null;
         let selectedDeparture = null;
-        //get calendar date format
-        let format = getCalendarParameter('dateFormat', this);
-        //get dates
-        let dates = getCalendarAvailability(this);
         //get calendar type
         let type = getCalendarType(this);
         //get calendar current state
         let state = getCalendarState(this);
+        //get calendar date format
+        let format = getCalendarParameter('dateFormat', this);
+        //get dates
+        let dates = getCalendarAvailability(this);
+        //get current date as string to use as key in dates
+        let date = dateToString(current, format);
         //handle the selected dates if needed
         if ('active' === type) {
             //grab selected arrival date
@@ -332,8 +334,6 @@ jQuery(document).ready(function ($) {
         if (current > stringToDate(maxDate, format)) {
             return [false, classes.join(' '), messages.join(' ')];
         }
-        //get current date as string to use as key in dates
-        let date = dateToString(current, format);
         //see if key is present in dates and return unavailable if not
         if (!dates.hasOwnProperty(date)) {
             return [false, classes.join(' '), messages.join(' ')];
