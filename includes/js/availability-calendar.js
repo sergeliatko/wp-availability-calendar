@@ -2,6 +2,13 @@
 jQuery(document).ready(function ($) {
 
     /**
+     * Atom date format to store date key.
+     *
+     * @type {string}
+     */
+    const dateKeyFormat = 'yy-mm-dd';
+
+    /**
      * Calendar type when no arrival or departure inputs are defined.
      *
      * @type {string}
@@ -30,19 +37,6 @@ jQuery(document).ready(function ($) {
     const departure = 'departure';
 
     /**
-     *
-     * @param {Object} object
-     * @returns {null|*}
-     */
-    function getObjectLastItem(object) {
-        let keys = Object.keys(object);
-        if (0 >= keys.length) {
-            return null;
-        }
-        return object[keys[keys.length - 1]];
-    }
-
-    /**
      * Adds days to provided date returning new date object.
      * @param {Date} date
      * @param {Number} days
@@ -61,19 +55,29 @@ jQuery(document).ready(function ($) {
      * @returns {string}
      */
     function dateToString(date, format) {
-        // noinspection JSUnresolvedVariable,JSUnresolvedFunction
-        return $.datepicker.formatDate(format, date);
+        try {
+            // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+            return $.datepicker.formatDate(format, date);
+        } catch (e) {
+            console.log(e);
+        }
+        return '';
     }
 
     /**
      *
      * @param {string} date
      * @param {string} format
-     * @returns {Date}
+     * @returns {Date|null}
      */
     function stringToDate(date, format) {
-        // noinspection JSUnresolvedVariable,JSUnresolvedFunction
-        return $.datepicker.parseDate(format, date);
+        try {
+            // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+            return $.datepicker.parseDate(format, date);
+        } catch (e) {
+            console.log(e);
+        }
+        return null;
     }
 
     /**
@@ -92,7 +96,7 @@ jQuery(document).ready(function ($) {
      * @returns {string}
      */
     function getCalendarInstance(calendar) {
-        return getElementData('instance', calendar);
+        return readElementData('instance', calendar);
     }
 
     /**
@@ -123,18 +127,8 @@ jQuery(document).ready(function ($) {
      * @returns {HTMLElement|null}
      */
     function getCalendarInputField(field, calendar) {
-        switch (field) {
-            case 'arrival':
-                return document.getElementById(getCalendarParameter('arrivalId', calendar));
-            case 'arrivalDisplay':
-                return document.getElementById(getCalendarParameter('arrivalIdDisplay', calendar));
-            case 'departure':
-                return document.getElementById(getCalendarParameter('departureId', calendar));
-            case 'departureDisplay':
-                return document.getElementById(getCalendarParameter('departureIdDisplay', calendar));
-            default:
-                return null;
-        }
+        let id = getCalendarParameter(field + 'Id', calendar);
+        return ((null === id) || ('' === id)) ? null : document.getElementById(id);
     }
 
     /**
@@ -143,13 +137,13 @@ jQuery(document).ready(function ($) {
      * @returns {string}
      */
     function getCalendarType(calendar) {
-        let currentType = getElementData('type', calendar);
-        if (null === currentType) {
+        let currentType = readElementData('type', calendar);
+        if ('' === currentType) {
             currentType = (
                 (null === getCalendarInputField(arrival, calendar))
                 || (null === getCalendarInputField(departure, calendar))
             ) ? display : active;
-            setElementData('type', currentType, calendar);
+            writeElementData('type', currentType, calendar);
         }
         return currentType;
     }
@@ -168,10 +162,11 @@ jQuery(document).ready(function ($) {
      *
      * @param {string} key
      * @param {HTMLElement} element
-     * @returns {string|null}
+     * @returns {string}
      */
-    function getElementData(key, element) {
-        return element.getAttribute('data-' + key);
+    function readElementData(key, element) {
+        let data = element.getAttribute('data-' + key);
+        return (null === data) ? '' : data;
     }
 
     /**
@@ -180,8 +175,17 @@ jQuery(document).ready(function ($) {
      * @param {string} value
      * @param {HTMLElement} element
      */
-    function setElementData(key, value, element) {
+    function writeElementData(key, value, element) {
         element.setAttribute('data-' + key, value);
+    }
+
+    /**
+     *
+     * @param {string} key
+     * @param {HTMLElement} element
+     */
+    function removeElementData(key, element) {
+        element.removeAttribute('data-' + key);
     }
 
     /**
@@ -190,8 +194,8 @@ jQuery(document).ready(function ($) {
      * @returns {string}
      */
     function getCalendarState(calendar) {
-        let state = getElementData('state', calendar);
-        if (null === state) {
+        let state = readElementData('state', calendar);
+        if ('' === state) {
             state = arrival;
             setCalendarState(calendar, state);
         }
@@ -205,7 +209,7 @@ jQuery(document).ready(function ($) {
      */
     function setCalendarState(calendar, state) {
         state = ('undefined' === typeof state) ? arrival : state;
-        setElementData('state', state, calendar);
+        writeElementData('state', state, calendar);
     }
 
     /**
@@ -228,41 +232,62 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function updateCalendarCellData(calendar) {
-        let showRates = (true === getCalendarParameter('showRates', calendar));
-        //if no show rates - return for now
-        if (!showRates) {
-            return;
-        }
-        let format = getCalendarParameter('dateFormat', calendar);
-        let dates = getCalendarAvailability(calendar);
-        // noinspection JSUnresolvedFunction
-        $(calendar).find('.ui-datepicker-calendar td > *[class*="ui-state"]').each(function () {
-            let day = this.textContent;
-            if ('' !== day) {
-                let date = new Date(
-                    parseInt(this.parentNode.getAttribute('data-year')),
-                    parseInt(this.parentNode.getAttribute('data-month')),
-                    parseInt(this.textContent),
-                    0, 0, 0, 0
-                );
-                if (date instanceof Date && !isNaN(date)) {
-                    let dateString = dateToString(date, format);
-                    if (
-                        dates.hasOwnProperty(dateString)
-                        && ('undefined' !== typeof dates[dateString].rate)
-                        && ('' !== dates[dateString].rate)
-                    ) {
-                        if (null === getElementData('rate', this.parentNode)) {
-                            setElementData('rate', dates[dateString].rate, this.parentNode);
-                            let rate = document.createElement('span');
-                            rate.className = 'nightly-rate';
-                            rate.appendChild(document.createTextNode(dates[dateString].rate));
-                            this.parentNode.appendChild(rate);
-                        }
-                    }
+        //handle show rates
+        if (true === getCalendarParameter('showRates', calendar)) {
+            let format = getCalendarParameter('dateFormat', calendar);
+            let dates = getCalendarAvailability(calendar);
+            // noinspection JSUnresolvedFunction
+            $(calendar).find(
+                '.ui-datepicker-calendar td.has-rate[class*="date-key-"] > *[class*="ui-state"]'
+            ).each(function () {
+                //extract date from css class
+                let date = extractDateKey(this.parentNode.className, format);
+                //initiate rate
+                let rate = '';
+                //extract rate data and check all conditions
+                if (
+                    (undefined !== date)
+                    && hasDateData(date, dates)
+                    && ('' !== (rate = getRate(getDateData(date, dates))))
+                    && (0 === $(this.parentNode).find('.rate').length)
+                ) {
+                    //append rate element to cell
+                    let rateElement = document.createElement('span');
+                    rateElement.className = 'rate';
+                    rateElement.appendChild(document.createTextNode(rate));
+                    this.parentNode.appendChild(rateElement);
                 }
+            });
+        }
+        //handle double click
+        // noinspection JSUnresolvedFunction
+        $(calendar).find('.ui-datepicker-calendar td[title]').contextmenu(function (event) {
+            event.preventDefault();
+            try {
+                alert(this.getAttribute('title').replace(/\.\s?/gi, ".\n"));
+            } catch (e) {
+                console.log(e);
             }
         });
+    }
+
+    /**
+     *
+     * @param {string} classes
+     * @param {string} format
+     * @returns {string|undefined}
+     */
+    function extractDateKey(classes, format) {
+        let match = null;
+        let regex = /date-key-(\d{4}-\d{2}-\d{2})/;
+        if (
+            ('string' === typeof classes)
+            && (null !== (match = classes.match(regex)))
+            && ('string' === typeof match[1])
+        ) {
+            return convertDate(match[1], dateKeyFormat, format);
+        }
+        return undefined;
     }
 
     /**
@@ -276,17 +301,129 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     * Compares dates by getTime(). (you may not compare two objects with same value using ===)
+     * @param {Date} date1
+     * @param {Date} date2
+     * @returns {boolean}
+     */
+    function areDatesEqual(date1, date2) {
+        if (
+            (null === date1)
+            || (null === date2)
+            || ('function' !== typeof date1.getTime)
+            || ('function' !== typeof date2.getTime)
+        ) {
+            //no function getTime() in at least one of the dates
+            return false;
+        }
+        return date1.getTime() === date2.getTime();
+    }
+
+    /**
+     * Returns date data from dates or empty object.
      *
-     * @param {Date} current
+     * @param {string|null} dateString
+     * @param {object} dates
+     * @returns {object}
+     */
+    function getDateData(dateString, dates) {
+        let data = getObjectProperty(dateString, dates, 'object');
+        return (undefined === data) ? {} : data;
+    }
+
+    /**
+     * Extracts rate as string from date data.
+     *
+     * @param {object} dateData
+     * @returns {string}
+     */
+    function getRate(dateData) {
+        let rate = getObjectProperty('rate', dateData, 'string');
+        return (undefined === rate) ? '' : rate;
+    }
+
+    /**
+     * Returns date data available property or false.
+     *
+     * @param {object} dateData
+     * @returns {boolean}
+     */
+    function isAvailable(dateData) {
+        let available = getObjectProperty('available', dateData, 'boolean');
+        return (undefined === available) ? false : available;
+    }
+
+    /**
+     * Returns date data arrival (allowed) property or false.
+     *
+     * @param {object} dateData
+     * @returns {boolean}
+     */
+    function isArrivalAllowed(dateData) {
+        let arrivalAllowed = getObjectProperty('arrival', dateData, 'boolean');
+        return (undefined === arrivalAllowed) ? false : arrivalAllowed;
+    }
+
+    /**
+     * Returns date data departure (allowed) property or false.
+     *
+     * @param {object} dateData
+     * @returns {boolean}
+     */
+    function isDepartureAllowed(dateData) {
+        let departureAllowed = getObjectProperty('departure', dateData, 'boolean');
+        return (undefined === departureAllowed) ? false : departureAllowed;
+    }
+
+    /**
+     *
+     * @param {string} date
+     * @param {object} dates
+     * @returns {boolean}
+     */
+    function hasDateData(date, dates) {
+        return objectHasProperty(date, dates, 'object');
+    }
+
+    /**
+     *
+     * @param {string|null} key
+     * @param {object} object
+     * @param {string} type
+     * @returns {undefined|*}
+     */
+    function getObjectProperty(key, object, type) {
+        return objectHasProperty(key, object, type) ? object[key] : undefined;
+    }
+
+    /**
+     * Checks if object has own property of specified type.
+     *
+     * @param {string|null} key
+     * @param {object} object
+     * @param {string} type
+     * @returns {boolean}
+     */
+    function objectHasProperty(key, object, type) {
+        return (
+            ('string' === typeof key)
+            && ('object' === typeof object)
+            && (object.hasOwnProperty(key))
+            && (type === typeof object[key])
+        );
+    }
+
+    /**
+     *
+     * @param {Date} theDate
      * @returns {*[]}
      */
-    function beforeShowDay(current) {
+    function beforeShowDay(theDate) {
         //initiate classes and messages
         let classes = [];
         let messages = [];
-        //initiate arrival and departure selected dates
-        let selectedArrival = null;
-        let selectedDeparture = null;
+
+        //GET DATA
         //get calendar type
         let type = getCalendarType(this);
         //get calendar current state
@@ -296,125 +433,233 @@ jQuery(document).ready(function ($) {
         //get dates
         let dates = getCalendarAvailability(this);
         //get current date as string to use as key in dates
-        let date = dateToString(current, format);
-        //handle the selected dates if needed
-        if ('active' === type) {
-            //grab selected arrival date
-            let arrivalInput = getCalendarInputField('arrival', this);
-            selectedArrival = ('' === arrivalInput.value) ? stringToDate(arrivalInput.value, format) : null;
-            //handle case the current is selected arrival
-            if (selectedArrival === current) {
-                classes.push('selected-arrival');
-                messages.push('Your selected arrival date.');
-            }
-            //grab selected departure date
-            let departureInput = getCalendarInputField('arrival', this);
-            selectedDeparture = ('' === departureInput.value) ? stringToDate(departureInput.value, format) : null;
-            if (selectedDeparture === current) {
-                classes.push('selected-departure');
-                messages.push('Your selected departure date.');
-            }
-            //handle stay period
-            if ((null !== selectedArrival) && (null !== selectedDeparture)) {
-                if (selectedArrival < current < selectedDeparture) {
-                    classes.push('selected-date');
-                    messages.push('Your stay period.');
-                }
-            }
+        let theDateString = dateToString(theDate, format);
+
+        //store current date key in css class
+        let theDateKey = dateToString(theDate, dateKeyFormat);
+        classes.push('date-key-' + theDateKey);
+
+        //HANDLE FLAGS AND CLASSES
+        //DATA
+        //check if we have data for the current date
+        let hasData = hasDateData(theDateString, dates);
+        //handle data class
+        classes.push(hasData ? 'has-data' : 'no-data');
+        /**
+         * Current date data object.
+         *
+         * @type {object}
+         */
+        let dateData = getDateData(theDateString, dates);
+        //RATE
+        //set the rate string
+        let rate = getRate(dateData);
+        //check if we have rates
+        let hasRate = ('' !== rate);
+        //handle rate class
+        classes.push(hasRate ? 'has-rate' : 'no-rate');
+        //handle rate message
+        if (hasRate) {
+            messages.push(availabilityCalendar.messages.rate.replace('{rate}', rate));
         }
-        //reject dates before min date
-        if (current < stringToDate(getCalendarParameter('firstDate', this), format)) {
-            return [false, classes.join(' '), messages.join(' ')];
+        //handle minimum stay message
+        messages.push(availabilityCalendar.messages.minStay.replace(
+            '{minStay}',
+            getMinStay(theDateString, dates, getCalendarParameter('minStay', this))
+        ));
+        //BEFORE MIN DATE
+        //check if the date is before min date
+        let beforeMinDate = (theDate < stringToDate(getCalendarParameter('firstDate', this), format));
+        //handle classes before min date
+        if (beforeMinDate) {
+            classes.push('before-min-date');
         }
-        //reject dates after max date
-        let lastDay = null;
-        let lastDate = getCalendarParameter('lastDate', this);
+        //AFTER MAX DATE
+        //check if the date is after max date
+        let afterMaxDate = (theDate > stringToDate(getCalendarParameter('lastDate', this), format));
+        //handle class after max date
+        if (afterMaxDate) {
+            classes.push('after-max-date');
+        }
+        //AVAILABILITIES
+        //check if arrival is available
         // noinspection JSUnresolvedVariable
-        let maxDate = ('arrival' === state) ? lastDate : ((null === (lastDay = getObjectLastItem(dates))) ? lastDate : lastDay.date);
-        if (current > stringToDate(maxDate, format)) {
-            return [false, classes.join(' '), messages.join(' ')];
-        }
-        //see if key is present in dates and return unavailable if not
-        if (!dates.hasOwnProperty(date)) {
-            return [false, classes.join(' '), messages.join(' ')];
-        }
-        //departure state is available only for calendars with arrival date selected, handle it here
-        if (('departure' === state) && (null !== selectedArrival)) {
-            //grab minimum stay for current date
-            // noinspection JSUnresolvedVariable
-            let minStay = (0 === dates[date].minStay) ? getCalendarParameter('minStay', this) : dates[date].minStay;
-            //disable all dates before arrival + minimum stay
-            if (current < dateAddDays(selectedArrival, minStay)) {
-                return [false, classes.join(' '), messages.join(' ')];
+        let arrivalAvailable = (
+            isAvailable(dateData)
+            && !(beforeMinDate || afterMaxDate)
+        );
+        //handle class
+        classes.push(arrivalAvailable ? 'arrival-available' : 'arrival-unavailable');
+        //handle availability message
+        messages.push(
+            arrivalAvailable ?
+                availabilityCalendar.messages.available
+                : availabilityCalendar.messages.unavailable
+        );
+        //check if departure is available
+        //get yesterday date
+        let yesterdayData = getDateData(dateToString(dateAddDays(theDate, -1), format), dates);
+        //if yesterday is available then departure is also available
+        let departureAvailable = (
+            isAvailable(yesterdayData)
+            && !(beforeMinDate || afterMaxDate)
+        );
+        //handle class
+        classes.push(departureAvailable ? 'departure-available' : 'departure-unavailable');
+        //ALLOWANCES
+        //check if arrivals are allowed
+        let arrivalAllowed = isArrivalAllowed(dateData);
+        //handle class
+        classes.push(arrivalAllowed ? 'arrival-allowed' : 'arrival-prohibited');
+        //handle messages
+        messages.push(
+            arrivalAllowed ?
+                availabilityCalendar.messages.arrivalsAllowed
+                : availabilityCalendar.messages.arrivalsNotAllowed
+        );
+        //check if departures are allowed
+        let departureAllowed = isDepartureAllowed(dateData);
+        //handle class
+        classes.push(departureAllowed ? 'departure-allowed' : 'departure-prohibited');
+        //handle messages
+        //handle messages
+        messages.push(
+            departureAllowed ?
+                availabilityCalendar.messages.departuresAllowed
+                : availabilityCalendar.messages.departuresNotAllowed
+        );
+        //ARRIVAL / DEPARTURE POSSIBILITIES
+        let canArrive = (arrivalAvailable && arrivalAllowed);
+        let canDepart = (departureAvailable && departureAllowed);
+        //STAY PERIOD
+        let conflictMessage = false;
+        //SELECTED ARRIVAL
+        let selectedArrivalDateString = readElementData('selected-arrival', this);
+        let selectedArrivalDate = stringToDate(selectedArrivalDateString, format);
+        let selectedArrival = (
+            (null !== selectedArrivalDate)
+            && areDatesEqual(theDate, selectedArrivalDate)
+        );
+        if (selectedArrival) {
+            classes.push('selected-arrival');
+            messages.push(availabilityCalendar.messages.selectedArrival);
+            //handle case when unable to arrive
+            if (
+                !canArrive
+                || beforeMinDate
+                || afterMaxDate
+            ) {
+                //evening conflict with rules or availability
+                classes.push('arrival-conflict');
+                conflictMessage = true;
             }
         }
-        //build logic for arrival state
-        if ('arrival' === state) {
-            //see if date is allowed for arrivals
-            let arrivalsAllowed = (true === dates[date].arrival);
-            //handle arrivals allowed case
-            if (!arrivalsAllowed) {
-                classes.push('arrivals-not-allowed');
-            }
-            //see if date is available
-            // noinspection JSUnresolvedVariable
-            let available = (true === dates[date].available);
-            //check for arrival / departure only cases
-            //get yesterday date
-            let yesterday = dateToString(dateAddDays(current, -1), format);
-            // noinspection JSUnresolvedVariable
-            let availableYesterday = dates.hasOwnProperty(yesterday) ? (true === dates[yesterday].available) : false;
-            if (!available) {
-                //handle not available case
-                classes.push('unavailable');
-                messages.push('Unavailable.');
-                //handle conflicts with selected period
-                if (
-                    (current === selectedArrival)
-                    || (
-                        (null !== selectedArrival) && (null !== selectedDeparture)
-                        && (selectedArrival < current < selectedDeparture)
-                    )
-                ) {
-                    classes.push('selected-conflict');
-                    messages.push('Conflicts with your selected period.');
-                }
-                //handle departure only case
-                if (availableYesterday) {
-                    classes.push('departure-only');
-                    messages.push('Departure only.');
-                }
-                return [false, classes.join(' '), messages.join(' ')];
-            } else {
-                //handle available case
-                classes.push('available');
-                //are arrival allowed this day?
-                if (arrivalsAllowed) {
-                    messages.push('Available for arrival.');
-                    // noinspection JSUnresolvedVariable
-                    messages.push(parseInt(dates[date].minStay).toString() + ' night(s) minimum stay.');
-                } else {
-                    messages.push('Available. Arrivals are not allowed this day.');
-                }
-                // noinspection JSUnresolvedVariable
-                messages.push('Rates from ' + dates[date].rate + '/night.');
-                if (!availableYesterday) {
-                    classes.push('arrival-only');
-                }
-                return [arrivalsAllowed, classes.join(' '), messages.join(' ')];
+        //SELECTED DEPARTURE
+        let selectedDepartureDateString = readElementData('selected-departure', this);
+        let selectedDepartureDate = stringToDate(selectedDepartureDateString, format);
+        let selectedDeparture = (
+            (null !== selectedDepartureDate)
+            && areDatesEqual(theDate, selectedDepartureDate)
+        );
+        if (selectedDeparture) {
+            classes.push('selected-departure');
+            messages.push(availabilityCalendar.messages.selectedDeparture);
+            //handle case when departure is not possible
+            if (
+                !canDepart
+                || beforeMinDate
+                || afterMaxDate
+            ) {
+                //morning conflict with rules or availability
+                classes.push('departure-conflict');
+                conflictMessage = true;
             }
         }
-        //handle the 'departure' state
-        else {
-            //see if date is allowed for departures
-            let departuresAllowed = (true === dates[date].departure);
-            //handle arrivals allowed case
-            if (!departuresAllowed) {
-                classes.push('departures-not-allowed');
+        //SELECTED STAY
+        if (
+            (null !== selectedArrivalDate)
+            && (null !== selectedDepartureDate)
+            && ((selectedArrivalDate < theDate) && (theDate < selectedDepartureDate))
+        ) {
+            classes.push('selected-stay');
+            messages.push(availabilityCalendar.messages.selectedStay);
+            //handle cases with conflict
+            if (
+                (!arrivalAvailable && !departureAvailable)
+                || beforeMinDate
+                || afterMaxDate
+            ) {
+                //full day conflict
+                classes.push('stay-conflict');
+                conflictMessage = true;
+            } else if (!arrivalAvailable) {
+                //evening conflict
+                classes.push('arrival-conflict');
+                conflictMessage = true;
+            } else if (!departureAvailable) {
+                //morning conflict
+                classes.push('departure-conflict');
+                conflictMessage = true;
+            }
+        }
+        if (true === conflictMessage) {
+            messages.push(availabilityCalendar.messages.conflict);
+        }
+        //MINIMUM STAY IN DEPARTURE STATE
+        let minDepartureDateString = readElementData('first-departure', this);
+        let minStayMessage = false;
+        if (
+            (departure === state)
+            && ('' !== minDepartureDateString)
+        ) {
+            if (
+                ('' !== selectedArrivalDateString)
+                && (theDateString === selectedArrivalDateString)
+            ) {
+                //the selected arrival date is in minimum stay requirement
+                classes.push('minimum-stay-requirement');
+                minStayMessage = true;
+            } else if (
+                ('' !== selectedArrivalDateString)
+                && (isDateStringBefore(selectedArrivalDateString, theDateString, format))
+                && (isDateStringBefore(theDateString, minDepartureDateString, format))
+            ) {
+                //the date is in the minimum stay requirement period
+                classes.push('minimum-stay-requirement selected-stay');
+                minStayMessage = true;
+            } else if (theDateString === minDepartureDateString) {
+                classes.push('minimum-stay-requirement selected-departure');
+                messages.push(availabilityCalendar.messages.firstAvailableDeparture);
+            }
+            if (true === minStayMessage) {
+                messages.push(availabilityCalendar.messages.inMinStayPeriod);
             }
         }
 
-        return [false, classes.join(' '), messages.join(' ')];
+        //END HANDLE FLAGS, CLASSES AND MESSAGES
+
+        //set default selectable to false
+        let selectable = false;
+
+        //HANDLE RETURN STATEMENTS
+        if (arrival === state) {
+            //calendar is waiting for arrival date to be inserted
+            selectable = canArrive;
+        } else {
+            //calendar is waiting for departure date to be inserted
+            //reject departure dates if cannot depart or date in not in range
+            selectable = (
+                canDepart
+                && isDateStringInRange(
+                    theDateString,
+                    readElementData('first-departure', this),
+                    readElementData('last-departure', this),
+                    format
+                )
+            );
+        }
+
+        return [selectable, classes.join(' '), messages.join(' ')];
     }
 
     /**
@@ -426,17 +671,324 @@ jQuery(document).ready(function ($) {
     function onSelect(dateString, instance, calendar) {
         //get current calendar state
         let state = getCalendarState(calendar);
-        //update calendar input field
-        let inputField = getCalendarInputField(state, calendar);
-        inputField.value = dateString;
-        //update calendar display input
-        let displayInputField = getCalendarInputField(state + 'Display', calendar);
-        if (null !== displayInputField) {
+        //handle possible departure date before switching state to departure
+        //(or it risks to lock the calendar)
+        if (arrival === state) {
+            //initiate messages
+            let messages = [];
+            //get format
+            let lastDepartureDateString = getLastDepartureDateString(dateString, calendar);
+            let firstDepartureDateString = getFirstDepartureDateString(dateString, calendar);
+            //check minimum stay requirement
             // noinspection JSUnresolvedVariable
-            displayInputField.value = convertDate(dateString, instance.settings.dateFormat, instance.settings.altFormat);
+            if (isDateStringBefore(
+                lastDepartureDateString,
+                firstDepartureDateString,
+                instance.settings.dateFormat
+            )) {
+                //minimum stay requirement is not met - alert guest and return
+                messages.push(availabilityCalendar.messages.minStayRequirementViolated);
+                messages.push(availabilityCalendar.messages.chooseAnotherDate);
+                alert(messages.join("\n"));
+                lateUpdateCalendarCellData(calendar);
+                return;
+            }
+            //exit with error if departure date is not selectable
+            // noinspection JSUnresolvedVariable
+            if (!isDateStringInRange(
+                getFirstAllowedDepartureDateString(firstDepartureDateString, calendar),
+                firstDepartureDateString,
+                lastDepartureDateString,
+                instance.settings.dateFormat
+            )) {
+                //first allowed departure date is not selectable
+                messages.push(availabilityCalendar.messages.firstAllowedDepartureInaccessible);
+                messages.push(availabilityCalendar.messages.chooseAnotherDate);
+                alert(messages.join("\n"));
+                lateUpdateCalendarCellData(calendar);
+                return;
+            }
+            //departure calendar will not be locked at this point as it has at least one selectable departure
+            //clear departure fields
+            // noinspection JSUnresolvedVariable
+            updateCalendarFields(
+                '',
+                departure,
+                calendar,
+                instance.settings.dateFormat,
+                instance.settings.altFormat
+            );
+            //store first and last departure dates in calendar itself to limit the selectable range
+            writeElementData('first-departure', firstDepartureDateString, calendar);
+            writeElementData('last-departure', lastDepartureDateString, calendar);
         }
+        //calendar got selected departure date - clear first and last departure dates data to remove limits
+        else if (departure === state) {
+            removeElementData('first-departure', calendar);
+            removeElementData('last-departure', calendar);
+        }
+        //update calendar input fields with newly selected date
+        // noinspection JSUnresolvedVariable
+        updateCalendarFields(
+            dateString,
+            state,
+            calendar,
+            instance.settings.dateFormat,
+            instance.settings.altFormat
+        );
         //change calendar state
         changeCalendarState(calendar);
+    }
+
+    /**
+     *
+     * @param {string} newDate
+     * @param {string} fieldType
+     * @param {HTMLElement} calendar
+     * @param {string} format
+     * @param {string} displayFormat
+     */
+    function updateCalendarFields(newDate, fieldType, calendar, format, displayFormat) {
+        //update calendar selected date data
+        writeElementData('selected-' + fieldType, newDate, calendar);
+        //get working input field
+        let inputField = getCalendarInputField(fieldType, calendar);
+        inputField.value = newDate;
+        //update calendar display input if present
+        let displayInputField = getCalendarInputField(fieldType + 'Display', calendar);
+        if (null !== displayInputField) {
+            //update display input field with maybe converted new date
+            displayInputField.value = ('' === newDate) ?
+                newDate
+                : convertDate(
+                    newDate,
+                    format,
+                    displayFormat
+                );
+        }
+    }
+
+    /**
+     * Checks if given date string is prior to another date string in specific format.
+     *
+     * @param {string} dateString
+     * @param {string} beforeDateString
+     * @param {string} format
+     * @returns {boolean}
+     */
+    function isDateStringBefore(dateString, beforeDateString, format) {
+        return stringToDate(dateString, format) < stringToDate(beforeDateString, format);
+    }
+
+    /**
+     * Checks if given date string is within period defined by other two date strings in specific format.
+     *
+     * @param {string} dateString
+     * @param {string} startDateString
+     * @param {string} endDateString
+     * @param {string} format
+     * @returns {boolean}
+     */
+    function isDateStringInRange(dateString, startDateString, endDateString, format) {
+        let date = stringToDate(dateString, format);
+        let start = stringToDate(startDateString, format);
+        let end = stringToDate(endDateString, format);
+        return (
+            (null !== date)
+            && (null !== start)
+            && (null !== end)
+            && (start <= date)
+            && (date <= end)
+        );
+    }
+
+    /**
+     *
+     * @param {string} arrivalDateString
+     * @param {HTMLElement} calendar
+     * @returns {string}
+     */
+    function getFirstDepartureDateString(arrivalDateString, calendar) {
+        let minStay = getMinStay(
+            arrivalDateString,
+            getCalendarAvailability(calendar),
+            getCalendarParameter('minStay', calendar)
+        )
+        //get format to use
+        let format = getCalendarParameter('dateFormat', calendar);
+        return dateToString(dateAddDays(stringToDate(arrivalDateString, format), minStay), format);
+    }
+
+    /**
+     *
+     * @param {string} dateString
+     * @param {object} dates
+     * @param {number|*} defaultMinStay
+     * @returns {number}
+     */
+    function getMinStay(dateString, dates, defaultMinStay) {
+        if (hasDateData(dateString, dates)) {
+            let data = getDateData(dateString, dates);
+            let dateMinStay = getObjectProperty('minStay', data, 'number');
+            if (
+                ('number' === typeof dateMinStay)
+                && (0 < dateMinStay)
+            ) {
+                return dateMinStay;
+            }
+        }
+        if (
+            ('number' === typeof defaultMinStay)
+            && (0 < defaultMinStay)
+        ) {
+            return defaultMinStay;
+        }
+        return availabilityCalendar.defaults.minStay;
+    }
+
+    /**
+     *
+     * @param {string} arrivalDateString
+     * @param {HTMLElement} calendar
+     * @returns {string}
+     */
+    function getLastDepartureDateString(arrivalDateString, calendar) {
+        //get dates object
+        let dates = getCalendarAvailability(calendar);
+        //if arrival is not available return it back as first conflict
+        // noinspection JSUnresolvedVariable
+        if (!isDateStringAvailable(arrivalDateString, dates)) {
+            return arrivalDateString;
+        }
+        //get format to use
+        let format = getCalendarParameter('dateFormat', calendar);
+        //start by converting arrival to Date
+        let arrivalDate = stringToDate(arrivalDateString, format);
+        let addDays = 1;
+        let newDate = '';
+        //get max stay limit for this date in this calendar
+        let maxStay = getMaxStay(arrivalDateString, calendar);
+        while (isDateStringAvailable(newDate = dateToString(dateAddDays(arrivalDate, addDays), format), dates)) {
+            //if addDays >= maxStay - return newDate now
+            if (addDays >= maxStay) {
+                return newDate;
+            }
+            //add another day and restart the loop
+            addDays++;
+        }
+        return newDate;
+    }
+
+    /**
+     *
+     * @param {string} dateString
+     * @param {HTMLElement} calendar
+     * @returns {number}
+     */
+    function getMaxStay(dateString, calendar) {
+        let dates = getCalendarAvailability(calendar);
+        let defaultMaxStay = getCalendarParameter('maxStay', calendar);
+        // noinspection JSUnresolvedVariable
+        return (
+            dates.hasOwnProperty(dateString)
+            //make sure it is a number
+            && ('number' === typeof dates[dateString].maxStay)
+            //make sure it is bigger than zero
+            && (0 < dates[dateString].maxStay)
+        ) ? dates[dateString].maxStay
+            : ((
+                //make sure default is a number
+                ('number' === typeof defaultMaxStay)
+                //and it is bigger than zero
+                && (0 < defaultMaxStay)
+            ) ? defaultMaxStay : availabilityCalendar.defaults.maxStay);
+    }
+
+    /**
+     * Checks if date provided as string is available for booking within dates.
+     *
+     * @param {string} dateString
+     * @param {object} dates
+     * @returns {boolean}
+     */
+    function isDateStringAvailable(dateString, dates) {
+        // noinspection JSUnresolvedVariable
+        return (
+            ('object' === typeof dates)
+            && dates.hasOwnProperty(dateString)
+            && ('undefined' !== dates[dateString].available)
+            && (true === dates[dateString].available)
+        );
+    }
+
+    /**
+     *
+     * @param {string} startDateString
+     * @param {HTMLElement} calendar
+     * @returns {string}
+     */
+    function getFirstAllowedDepartureDateString(startDateString, calendar) {
+        let dates = getCalendarAvailability(calendar);
+        if (isDateAllowedForDepartures(startDateString, dates)) {
+            return startDateString;
+        }
+        //get format to use
+        let format = getCalendarParameter('dateFormat', calendar);
+        let addDays = 1;
+        let newDate = dateToString(
+            dateAddDays(
+                stringToDate(startDateString, format),
+                addDays),
+            format
+        );
+        while (
+            !isDateAllowedForDepartures(newDate, dates)
+            && hasDateData(newDate, dates)
+            ) {
+            //add another day and restart the loop
+            addDays++;
+            newDate = dateToString(
+                dateAddDays(
+                    stringToDate(startDateString, format),
+                    addDays),
+                format
+            )
+        }
+        return newDate;
+    }
+
+    /**
+     * Checks if date provided as string is allowed for departures within dates.
+     *
+     * @param {string} dateString
+     * @param {object} dates
+     * @returns {boolean}
+     */
+    function isDateAllowedForDepartures(dateString, dates) {
+        // noinspection JSUnresolvedVariable
+        return (
+            ('object' === typeof dates)
+            && dates.hasOwnProperty(dateString)
+            && ('undefined' !== dates[dateString].departure)
+            && (true === dates[dateString].departure)
+        );
+    }
+
+    /**
+     * Checks if date provided as string is allowed for arrivals within dates.
+     *
+     * @param {string} dateString
+     * @param {object} dates
+     * @returns {boolean}
+     */
+    function isDateAllowedForArrivals(dateString, dates) {
+        // noinspection JSUnresolvedVariable
+        return (
+            ('object' === typeof dates)
+            && dates.hasOwnProperty(dateString)
+            && ('undefined' !== dates[dateString].arrival)
+            && (true === dates[dateString].arrival)
+        );
     }
 
     /**
@@ -493,7 +1045,35 @@ jQuery(document).ready(function ($) {
     }
 
     //todo: handle in availabilityCalendar.messages
-    availabilityCalendar.messages = {};
+    availabilityCalendar.messages = {
+        chooseAnotherDate: 'Please, choose another date or call us for assistance.',
+        minStayRequirementViolated: 'Sorry, minimum stay requirement does not allow to arrive on this date.',
+        firstAllowedDepartureInaccessible: 'Sorry, first allowed departure date is unavailable if you arrive on this date.',
+        rate: 'Rates from {rate}/night.',
+        minStay: 'Minimum stay is {minStay} night(s).',
+        selectedArrival: 'Your selected arrival date.',
+        selectedStay: 'Your selected stay.',
+        selectedDeparture: 'Your selected departure.',
+        conflict: 'Conflicts with your selected dates.',
+        available: 'Available.',
+        unavailable: 'Booked.',
+        arrivalsAllowed: 'Arrivals allowed.',
+        departuresAllowed: 'Departures allowed.',
+        arrivalsNotAllowed: 'Arrivals are not allowed.',
+        departuresNotAllowed: 'Departures are not allowed.',
+        inMinStayPeriod: 'In minimum stay period.',
+        firstAvailableDeparture: 'First available departure.'
+    };
+
+    //todo: handle in availabilityCalendar.defaults
+    availabilityCalendar.defaults = {
+        maxStay: 180,
+        minStay: 1
+    }
+
+    //set clickTimeOut for double click handlers
+    let clickTimeout = null;
+    let doubleClicked = false;
 
     // noinspection JSUnresolvedFunction
     $('.availability-calendar').each(initiateCalendar);
