@@ -37,15 +37,74 @@ jQuery(document).ready(function ($) {
     const departure = 'departure';
 
     /**
-     * Adds days to provided date returning new date object.
-     * @param {Date} date
-     * @param {Number} days
-     * @returns {Date}
+     * Checks if provided parameter is a number and bigger than zero.
+     *
+     * @param {*} maybeNumber
+     * @returns {boolean}
      */
-    function dateAddDays(date, days) {
-        let newDate = new Date(date.getTime());
-        newDate.setDate(date.getDate() + days);
-        return newDate;
+    function numberBiggerThanZero(maybeNumber) {
+        return (
+            ('number' === typeof maybeNumber)
+            && (0 < maybeNumber)
+        );
+    }
+
+    /**
+     * Checks if object has own property of specified type.
+     *
+     * @param {string|null} key
+     * @param {object} object
+     * @param {string} type
+     * @returns {boolean}
+     */
+    function objectHasProperty(key, object, type) {
+        return (
+            ('string' === typeof key)
+            && ('object' === typeof object)
+            && (object.hasOwnProperty(key))
+            && (type === typeof object[key])
+        );
+    }
+
+    /**
+     *
+     * @param {string|null} key
+     * @param {object} object
+     * @param {string} type
+     * @returns {undefined|*}
+     */
+    function getObjectProperty(key, object, type) {
+        return objectHasProperty(key, object, type) ? object[key] : undefined;
+    }
+
+    /**
+     *
+     * @param {string} key
+     * @param {HTMLElement} element
+     * @returns {string}
+     */
+    function readElementData(key, element) {
+        let data = element.getAttribute('data-' + key);
+        return (null === data) ? '' : data;
+    }
+
+    /**
+     *
+     * @param {string} key
+     * @param {string} value
+     * @param {HTMLElement} element
+     */
+    function writeElementData(key, value, element) {
+        element.setAttribute('data-' + key, value);
+    }
+
+    /**
+     *
+     * @param {string} key
+     * @param {HTMLElement} element
+     */
+    function removeElementData(key, element) {
+        element.removeAttribute('data-' + key);
     }
 
     /**
@@ -92,11 +151,83 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     * Compares dates by getTime(). (you may not compare two objects with same value using ===)
+     * @param {Date} date1
+     * @param {Date} date2
+     * @returns {boolean}
+     */
+    function areDatesEqual(date1, date2) {
+        if (
+            (null === date1)
+            || (null === date2)
+            || ('function' !== typeof date1.getTime)
+            || ('function' !== typeof date2.getTime)
+        ) {
+            //no function getTime() in at least one of the dates
+            return false;
+        }
+        return date1.getTime() === date2.getTime();
+    }
+
+    /**
+     * Checks if given date string is prior to another date string in specific format.
+     *
+     * @param {string} date
+     * @param {string} before
+     * @param {string} format
+     * @returns {boolean}
+     */
+    function isDateStringBefore(date, before, format) {
+        let theDate = stringToDate(date, format);
+        let deadLine = stringToDate(before, format);
+        return (
+            (null !== theDate)
+            && (null !== deadLine)
+            && (theDate < deadLine)
+        );
+    }
+
+    /**
+     * Checks if given date string is within period defined by other two date strings in specific format.
+     *
+     * @param {string} dateString
+     * @param {string} startDateString
+     * @param {string} endDateString
+     * @param {string} format
+     * @returns {boolean}
+     */
+    function isDateStringInRange(dateString, startDateString, endDateString, format) {
+        let date = stringToDate(dateString, format);
+        let start = stringToDate(startDateString, format);
+        let end = stringToDate(endDateString, format);
+        return (
+            (null !== date)
+            && (null !== start)
+            && (null !== end)
+            && (start <= date)
+            && (date <= end)
+        );
+    }
+
+    /**
+     * Adds days to provided date returning new date object.
+     * @param {Date} date
+     * @param {Number} days
+     * @returns {Date}
+     */
+    function dateAddDays(date, days) {
+        let newDate = new Date(date.getTime());
+        newDate.setDate(date.getDate() + days);
+        return newDate;
+    }
+
+    /**
      * @param {HTMLElement} calendar
      * @returns {string}
      */
     function getCalendarInstance(calendar) {
-        return readElementData('instance', calendar);
+        let instance = readElementData('instance', calendar);
+        return ('' === instance) ? '0' : instance;
     }
 
     /**
@@ -155,37 +286,9 @@ jQuery(document).ready(function ($) {
     function getCalendarAvailability(calendar) {
         let i = getCalendarInstance(calendar);
         // noinspection JSUnresolvedVariable
-        return (undefined === availabilityCalendar.calendars[i]) ? {} : availabilityCalendar.calendars[i].availability;
-    }
-
-    /**
-     *
-     * @param {string} key
-     * @param {HTMLElement} element
-     * @returns {string}
-     */
-    function readElementData(key, element) {
-        let data = element.getAttribute('data-' + key);
-        return (null === data) ? '' : data;
-    }
-
-    /**
-     *
-     * @param {string} key
-     * @param {string} value
-     * @param {HTMLElement} element
-     */
-    function writeElementData(key, value, element) {
-        element.setAttribute('data-' + key, value);
-    }
-
-    /**
-     *
-     * @param {string} key
-     * @param {HTMLElement} element
-     */
-    function removeElementData(key, element) {
-        element.removeAttribute('data-' + key);
+        return (undefined === availabilityCalendar.calendars[i]) ?
+            {}
+            : availabilityCalendar.calendars[i].availability;
     }
 
     /**
@@ -210,6 +313,7 @@ jQuery(document).ready(function ($) {
     function setCalendarState(calendar, state) {
         state = ('undefined' === typeof state) ? arrival : state;
         writeElementData('state', state, calendar);
+        highlightInputFields(state, calendar);
     }
 
     /**
@@ -217,7 +321,7 @@ jQuery(document).ready(function ($) {
      *
      * @param {HTMLElement} calendar
      */
-    function changeCalendarState(calendar) {
+    function switchCalendarState(calendar) {
         //get current calendar state
         let state = getCalendarState(calendar);
         //update calendar state
@@ -228,20 +332,71 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     * Highlights and deems input fields depending the calendar state.
+     *
+     * @param {string} state
+     * @param {HTMLElement} calendar
+     */
+    function highlightInputFields(state, calendar) {
+        let oldState = (arrival === state) ? departure : arrival;
+        getVisibleInputFields(state, calendar).forEach(function (element) {
+            try {
+                // noinspection JSUnresolvedFunction
+                $(element.parentNode).removeClass('calendar-deem').addClass('calendar-highlight');
+            } catch (e) {
+                console.log(e);
+            }
+        });
+        getVisibleInputFields(oldState, calendar).forEach(function (element) {
+            try {
+                // noinspection JSUnresolvedFunction
+                $(element.parentNode).removeClass('calendar-highlight').addClass('calendar-deem');
+            } catch (e) {
+                console.log(e);
+            }
+        });
+    }
+
+    /**
+     * Returns visible fields for the provided calendar.
+     *
+     * @param {string} state
+     * @param {HTMLElement} calendar
+     * @returns {[]}
+     */
+    function getVisibleInputFields(state, calendar) {
+        let fields = [];
+        let types = ['', 'Display'];
+        for (let type in types) {
+            // noinspection JSUnfilteredForInLoop
+            let input = getCalendarInputField(state + types[type], calendar);
+            let inputType = null;
+            if (
+                (null !== input)
+                && (null !== (inputType = input.getAttribute('type')))
+                && ('hidden' !== inputType)
+            ) {
+                fields.push(input);
+            }
+        }
+        return fields;
+    }
+
+    /**
      *
      * @param {HTMLElement} calendar
      */
     function updateCalendarCellData(calendar) {
         //handle show rates
         if (true === getCalendarParameter('showRates', calendar)) {
-            let format = getCalendarParameter('dateFormat', calendar);
+            let format = getCalendarDateFormat(calendar);
             let dates = getCalendarAvailability(calendar);
             // noinspection JSUnresolvedFunction
             $(calendar).find(
                 '.ui-datepicker-calendar td.has-rate[class*="date-key-"] > *[class*="ui-state"]'
             ).each(function () {
                 //extract date from css class
-                let date = extractDateKey(this.parentNode.className, format);
+                let date = extractDateFromCSSClasses(this.parentNode.className, format);
                 //initiate rate
                 let rate = '';
                 //extract rate data and check all conditions
@@ -259,7 +414,7 @@ jQuery(document).ready(function ($) {
                 }
             });
         }
-        //handle double click
+        //handle context menu call
         // noinspection JSUnresolvedFunction
         $(calendar).find('.ui-datepicker-calendar td[title]').contextmenu(function (event) {
             event.preventDefault();
@@ -273,19 +428,19 @@ jQuery(document).ready(function ($) {
 
     /**
      *
-     * @param {string} classes
-     * @param {string} format
+     * @param {string} cssClasses
+     * @param {string} outputFormat
      * @returns {string|undefined}
      */
-    function extractDateKey(classes, format) {
+    function extractDateFromCSSClasses(cssClasses, outputFormat) {
         let match = null;
         let regex = /date-key-(\d{4}-\d{2}-\d{2})/;
         if (
-            ('string' === typeof classes)
-            && (null !== (match = classes.match(regex)))
+            ('string' === typeof cssClasses)
+            && (null !== (match = cssClasses.match(regex)))
             && ('string' === typeof match[1])
         ) {
-            return convertDate(match[1], dateKeyFormat, format);
+            return convertDate(match[1], dateKeyFormat, outputFormat);
         }
         return undefined;
     }
@@ -301,22 +456,13 @@ jQuery(document).ready(function ($) {
     }
 
     /**
-     * Compares dates by getTime(). (you may not compare two objects with same value using ===)
-     * @param {Date} date1
-     * @param {Date} date2
+     *
+     * @param {string} date
+     * @param {object} dates
      * @returns {boolean}
      */
-    function areDatesEqual(date1, date2) {
-        if (
-            (null === date1)
-            || (null === date2)
-            || ('function' !== typeof date1.getTime)
-            || ('function' !== typeof date2.getTime)
-        ) {
-            //no function getTime() in at least one of the dates
-            return false;
-        }
-        return date1.getTime() === date2.getTime();
+    function hasDateData(date, dates) {
+        return objectHasProperty(date, dates, 'object');
     }
 
     /**
@@ -376,41 +522,31 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     * Checks if date provided as string is available for booking within dates.
      *
      * @param {string} date
      * @param {object} dates
      * @returns {boolean}
      */
-    function hasDateData(date, dates) {
-        return objectHasProperty(date, dates, 'object');
+    function isDateAvailable(date, dates) {
+        if (hasDateData(date, dates)) {
+            return isAvailable(getDateData(date, dates));
+        }
+        return false;
     }
 
     /**
+     * Checks if date provided as string is allowed for departures within dates.
      *
-     * @param {string|null} key
-     * @param {object} object
-     * @param {string} type
-     * @returns {undefined|*}
-     */
-    function getObjectProperty(key, object, type) {
-        return objectHasProperty(key, object, type) ? object[key] : undefined;
-    }
-
-    /**
-     * Checks if object has own property of specified type.
-     *
-     * @param {string|null} key
-     * @param {object} object
-     * @param {string} type
+     * @param {string} date
+     * @param {object} dates
      * @returns {boolean}
      */
-    function objectHasProperty(key, object, type) {
-        return (
-            ('string' === typeof key)
-            && ('object' === typeof object)
-            && (object.hasOwnProperty(key))
-            && (type === typeof object[key])
-        );
+    function isDateAllowedForDepartures(date, dates) {
+        if (hasDateData(date, dates)) {
+            return isDepartureAllowed(getDateData(date, dates))
+        }
+        return false;
     }
 
     /**
@@ -424,8 +560,6 @@ jQuery(document).ready(function ($) {
         let messages = [];
 
         //GET DATA
-        //get calendar type
-        let type = getCalendarType(this);
         //get calendar current state
         let state = getCalendarState(this);
         //get calendar date format
@@ -465,7 +599,7 @@ jQuery(document).ready(function ($) {
         //handle minimum stay message
         messages.push(availabilityCalendar.messages.minStay.replace(
             '{minStay}',
-            getMinStay(theDateString, dates, getCalendarParameter('minStay', this))
+            getMinStay(theDateString, this)
         ));
         //BEFORE MIN DATE
         //check if the date is before min date
@@ -638,7 +772,7 @@ jQuery(document).ready(function ($) {
 
         //END HANDLE FLAGS, CLASSES AND MESSAGES
 
-        //set default selectable to false
+        // noinspection JSUnusedAssignment
         let selectable = false;
 
         //HANDLE RETURN STATEMENTS
@@ -737,7 +871,7 @@ jQuery(document).ready(function ($) {
             instance.settings.altFormat
         );
         //change calendar state
-        changeCalendarState(calendar);
+        switchCalendarState(calendar);
     }
 
     /**
@@ -769,81 +903,57 @@ jQuery(document).ready(function ($) {
     }
 
     /**
-     * Checks if given date string is prior to another date string in specific format.
-     *
-     * @param {string} dateString
-     * @param {string} beforeDateString
-     * @param {string} format
-     * @returns {boolean}
-     */
-    function isDateStringBefore(dateString, beforeDateString, format) {
-        return stringToDate(dateString, format) < stringToDate(beforeDateString, format);
-    }
-
-    /**
-     * Checks if given date string is within period defined by other two date strings in specific format.
-     *
-     * @param {string} dateString
-     * @param {string} startDateString
-     * @param {string} endDateString
-     * @param {string} format
-     * @returns {boolean}
-     */
-    function isDateStringInRange(dateString, startDateString, endDateString, format) {
-        let date = stringToDate(dateString, format);
-        let start = stringToDate(startDateString, format);
-        let end = stringToDate(endDateString, format);
-        return (
-            (null !== date)
-            && (null !== start)
-            && (null !== end)
-            && (start <= date)
-            && (date <= end)
-        );
-    }
-
-    /**
      *
      * @param {string} arrivalDateString
      * @param {HTMLElement} calendar
      * @returns {string}
      */
     function getFirstDepartureDateString(arrivalDateString, calendar) {
-        let minStay = getMinStay(
-            arrivalDateString,
-            getCalendarAvailability(calendar),
-            getCalendarParameter('minStay', calendar)
-        )
         //get format to use
-        let format = getCalendarParameter('dateFormat', calendar);
-        return dateToString(dateAddDays(stringToDate(arrivalDateString, format), minStay), format);
+        let format = getCalendarDateFormat(calendar);
+        return dateToString(
+            dateAddDays(
+                stringToDate(arrivalDateString, format),
+                getMinStay(arrivalDateString, calendar)
+            ),
+            format
+        );
     }
 
     /**
+     * Returns min stay for specific date or calendar default.
      *
      * @param {string} dateString
-     * @param {object} dates
-     * @param {number|*} defaultMinStay
+     * @param {HTMLElement} calendar
      * @returns {number}
      */
-    function getMinStay(dateString, dates, defaultMinStay) {
+    function getMinStay(dateString, calendar) {
+        let dates = getCalendarAvailability(calendar);
         if (hasDateData(dateString, dates)) {
-            let data = getDateData(dateString, dates);
-            let dateMinStay = getObjectProperty('minStay', data, 'number');
-            if (
-                ('number' === typeof dateMinStay)
-                && (0 < dateMinStay)
-            ) {
+            let dateMinStay = getObjectProperty(
+                'minStay',
+                getDateData(dateString, dates),
+                'number'
+            );
+            if (numberBiggerThanZero(dateMinStay)) {
                 return dateMinStay;
             }
         }
-        if (
-            ('number' === typeof defaultMinStay)
-            && (0 < defaultMinStay)
-        ) {
-            return defaultMinStay;
-        }
-        return availabilityCalendar.defaults.minStay;
+        return getDefaultMinStay(calendar);
+    }
+
+    /**
+     * Returns calendar default min stay or global min stay default.
+     *
+     * @param {HTMLElement} calendar
+     * @returns {number}
+     */
+    function getDefaultMinStay(calendar) {
+        let parameters = getCalendarParameters(calendar);
+        let calendarDefault = getObjectProperty('minStay', parameters, 'number');
+        return numberBiggerThanZero(calendarDefault) ?
+            calendarDefault
+            : availabilityCalendar.defaults.minStay;
     }
 
     /**
@@ -857,18 +967,18 @@ jQuery(document).ready(function ($) {
         let dates = getCalendarAvailability(calendar);
         //if arrival is not available return it back as first conflict
         // noinspection JSUnresolvedVariable
-        if (!isDateStringAvailable(arrivalDateString, dates)) {
+        if (!isDateAvailable(arrivalDateString, dates)) {
             return arrivalDateString;
         }
         //get format to use
-        let format = getCalendarParameter('dateFormat', calendar);
+        let format = getCalendarDateFormat(calendar);
         //start by converting arrival to Date
         let arrivalDate = stringToDate(arrivalDateString, format);
         let addDays = 1;
         let newDate = '';
         //get max stay limit for this date in this calendar
         let maxStay = getMaxStay(arrivalDateString, calendar);
-        while (isDateStringAvailable(newDate = dateToString(dateAddDays(arrivalDate, addDays), format), dates)) {
+        while (isDateAvailable(newDate = dateToString(dateAddDays(arrivalDate, addDays), format), dates)) {
             //if addDays >= maxStay - return newDate now
             if (addDays >= maxStay) {
                 return newDate;
@@ -905,23 +1015,6 @@ jQuery(document).ready(function ($) {
     }
 
     /**
-     * Checks if date provided as string is available for booking within dates.
-     *
-     * @param {string} dateString
-     * @param {object} dates
-     * @returns {boolean}
-     */
-    function isDateStringAvailable(dateString, dates) {
-        // noinspection JSUnresolvedVariable
-        return (
-            ('object' === typeof dates)
-            && dates.hasOwnProperty(dateString)
-            && ('undefined' !== dates[dateString].available)
-            && (true === dates[dateString].available)
-        );
-    }
-
-    /**
      *
      * @param {string} startDateString
      * @param {HTMLElement} calendar
@@ -933,7 +1026,7 @@ jQuery(document).ready(function ($) {
             return startDateString;
         }
         //get format to use
-        let format = getCalendarParameter('dateFormat', calendar);
+        let format = getCalendarDateFormat(calendar);
         let addDays = 1;
         let newDate = dateToString(
             dateAddDays(
@@ -958,37 +1051,60 @@ jQuery(document).ready(function ($) {
     }
 
     /**
-     * Checks if date provided as string is allowed for departures within dates.
+     * Returns calendar date format or default format string.
      *
-     * @param {string} dateString
-     * @param {object} dates
-     * @returns {boolean}
+     * @param {HTMLElement} calendar
+     * @returns {string}
      */
-    function isDateAllowedForDepartures(dateString, dates) {
-        // noinspection JSUnresolvedVariable
+    function getCalendarDateFormat(calendar) {
+        let format = getCalendarParameter('dateFormat', calendar);
         return (
-            ('object' === typeof dates)
-            && dates.hasOwnProperty(dateString)
-            && ('undefined' !== dates[dateString].departure)
-            && (true === dates[dateString].departure)
-        );
+            ('string' === typeof format)
+            && ('' !== format)
+        ) ? format : availabilityCalendar.defaults.dateFormat;
     }
 
     /**
-     * Checks if date provided as string is allowed for arrivals within dates.
+     * Returns calendar display date format or default display format string.
      *
-     * @param {string} dateString
-     * @param {object} dates
-     * @returns {boolean}
+     * @param {HTMLElement} calendar
+     * @returns {string}
      */
-    function isDateAllowedForArrivals(dateString, dates) {
-        // noinspection JSUnresolvedVariable
+    function getCalendarDisplayDateFormat(calendar) {
+        let format = getCalendarParameter('dateFormatDisplay', calendar);
         return (
-            ('object' === typeof dates)
-            && dates.hasOwnProperty(dateString)
-            && ('undefined' !== dates[dateString].arrival)
-            && (true === dates[dateString].arrival)
-        );
+            ('string' === typeof format)
+            && ('' !== format)
+        ) ? format : availabilityCalendar.defaults.dateFormatDisplay;
+    }
+
+    /**
+     * Updates calendar and display fields from input fields.
+     *
+     * @param {HTMLElement} calendar
+     */
+    function updateCalendarFromInputs(calendar) {
+        let fields = [arrival, departure];
+        for (let index in fields) {
+            // noinspection JSUnfilteredForInLoop
+            let field = fields[index];
+            let inputField = getCalendarInputField(field, calendar);
+            if (
+                (null !== inputField)
+                && ('string' === typeof inputField.value)
+                && ('' !== inputField.value)
+            ) {
+                writeElementData('selected-' + field, inputField.value, calendar);
+                let displayInputField = getCalendarInputField(field + 'Display', calendar);
+                if (null !== displayInputField) {
+                    displayInputField.value = convertDate(
+                        inputField.value,
+                        getCalendarDateFormat(calendar),
+                        getCalendarDisplayDateFormat(calendar)
+                    );
+                }
+            }
+        }
     }
 
     /**
@@ -997,12 +1113,12 @@ jQuery(document).ready(function ($) {
      */
     function initiateCalendar(order, calendar) {
         console.log(availabilityCalendar);
+        //populate calendar dates from before drawing calendar
+        updateCalendarFromInputs(calendar);
         //on init set calendar to 'arrival' state
         setCalendarState(calendar, arrival);
         //grab calendar parameters
         let calendarParameters = getCalendarParameters(calendar);
-        //see what type of calendar we have
-        let calendarType = getCalendarType(calendar);
         // noinspection JSUnresolvedVariable
         let parameters = {
             //handle days display
@@ -1025,6 +1141,8 @@ jQuery(document).ready(function ($) {
                 lateUpdateCalendarCellData(this);
             }
         };
+        //see what type of calendar we have
+        let calendarType = getCalendarType(calendar);
         switch (calendarType) {
             //if simple display - build 'display only' calendar
             case display:
@@ -1067,13 +1185,11 @@ jQuery(document).ready(function ($) {
 
     //todo: handle in availabilityCalendar.defaults
     availabilityCalendar.defaults = {
+        dateFormat: 'yy-mm-dd',
+        dateFormatDisplay: 'yy-mm-dd',
         maxStay: 180,
         minStay: 1
     }
-
-    //set clickTimeOut for double click handlers
-    let clickTimeout = null;
-    let doubleClicked = false;
 
     // noinspection JSUnresolvedFunction
     $('.availability-calendar').each(initiateCalendar);

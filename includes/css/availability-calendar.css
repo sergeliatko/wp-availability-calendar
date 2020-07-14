@@ -1,11 +1,57 @@
 /* STRUCTURE */
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    color: inherit;
+}
+
+.ui-datepicker .ui-datepicker-prev.ui-state-disabled,
+.ui-datepicker .ui-datepicker-next.ui-state-disabled {
+    opacity: .35;
+}
+
+.ui-corner-left .ui-datepicker-prev,
+.ui-corner-left .ui-datepicker-next {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.ui-corner-right .ui-datepicker-prev,
+.ui-corner-right .ui-datepicker-next {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.ui-datepicker .ui-icon {
+    cursor: pointer;
+    height: 1em;
+    width: 1em;
+    display: block;
+    overflow: hidden;
+}
+
+.ui-datepicker .ui-icon:before {
+    display: inline-block;
+    font-family: dashicons;
+}
+
+.ui-datepicker .ui-icon.ui-icon-circle-triangle-w:before {
+    content: "\f341";
+}
+
+.ui-datepicker .ui-icon.ui-icon-circle-triangle-e:before {
+    content: "\f345";
+}
+
+
 .ui-datepicker.ui-datepicker-inline.ui-datepicker-multi {
     box-sizing: border-box;
     clear: both;
     display: flex !important;
     flex-flow: row wrap;
-    justify-content: space-between;
-    align-content: space-between;
+    justify-content: space-evenly;
+    align-content: space-evenly;
     align-items: flex-start;
     max-width: 100%;
     min-width: 100%;
@@ -24,15 +70,14 @@
 .ui-datepicker.ui-datepicker-inline.ui-datepicker-multi .ui-datepicker-group {
     flex: 0 1 auto;
     max-width: 100%;
-    width: 100%;
+    width: 17.55rem;
 }
 
-.ui-datepicker.ui-datepicker-inline.ui-datepicker-multi.ui-datepicker-multi-2 .ui-datepicker-group {
-    max-width: 48%;
-}
-
-.ui-datepicker.ui-datepicker-inline.ui-datepicker-multi.ui-datepicker-multi-3 .ui-datepicker-group {
-    max-width: 31%;
+.ui-datepicker-header {
+    text-align: center;
+    position: relative;
+    font-size: 1.125rem;
+    line-height: 1.375;
 }
 
 .ui-datepicker-calendar {
@@ -71,11 +116,31 @@
     display: block;
     font-size: .5625rem;
     font-weight: lighter;
-    opacity: .65;
+    opacity: .85;
     white-space: nowrap;
 }
 
 /* UI LOGIC */
+
+.calendar-highlight > input {
+    color: #000000;
+    border-color: #000000;
+    opacity: 1;
+}
+
+.calendar-deem > input {
+    opacity: .85;
+}
+
+/* defaults */
+.ui-datepicker-calendar td {
+    cursor: default;
+}
+
+.ui-datepicker-calendar td:not([class*="unselectable"]) {
+    cursor: pointer;
+}
+
 .ui-datepicker-calendar td.ui-datepicker-unselectable > .ui-state-default {
     text-decoration: line-through;
     opacity: .65;
@@ -85,14 +150,92 @@
     background-color: #EFEFEF;
 }
 
-.ui-datepicker-calendar td.available {
-    background-color: #FFFFFF;
+/* availability */
+.ui-datepicker-calendar td.arrival-available.departure-available {
+    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #FFFFFF 50%);
 }
 
-.ui-datepicker-calendar td.departure-only {
-    background: linear-gradient(to right bottom, #FFFFFF 50%, #EFEFEF 50%);
+.ui-datepicker-calendar td.arrival-available.departure-unavailable {
+    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #FFFFFF 50%);
 }
 
-.ui-datepicker-calendar td.arrival-only {
-    background: linear-gradient(to right bottom, #EFEFEF 50%, #FFFFFF 50%);
+.ui-datepicker-calendar td.arrival-unavailable.departure-available {
+    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #DDDDDD 50%);
+}
+
+.ui-datepicker-calendar td.arrival-unavailable.departure-unavailable {
+    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #DDDDDD 50%);
+}
+
+/* slected period */
+/* slected arrival */
+.ui-datepicker-calendar td.selected-arrival.departure-available {
+    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #80CC55 50%);
+}
+
+.ui-datepicker-calendar td.selected-arrival.departure-unavailable {
+    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #80CC55 50%);
+}
+
+.ui-datepicker-calendar td.selected-arrival.arrival-conflict.departure-available {
+    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #FF7D7D 50%);
+}
+
+.ui-datepicker-calendar td.selected-arrival.arrival-conflict.departure-unavailable {
+    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #FF7D7D 50%);
+}
+
+/* slected departure */
+.ui-datepicker-calendar td.selected-departure.arrival-available {
+    background-image: linear-gradient(to right bottom, #80CC55 50%, #FFFFFF 50%);
+}
+
+.ui-datepicker-calendar td.selected-departure.arrival-unavailable {
+    background-image: linear-gradient(to right bottom, #80CC55 50%, #DDDDDD 50%);
+}
+
+.ui-datepicker-calendar td.selected-departure.departure-conflict.arrival-available {
+    background-image: linear-gradient(to right bottom, #FF7D7D 50%, #FFFFFF 50%);
+}
+
+.ui-datepicker-calendar td.selected-departure.departure-conflict.arrival-unavailable {
+    background-image: linear-gradient(to right bottom, #FF7D7D 50%, #DDDDDD 50%);
+}
+
+/* selected stay */
+.ui-datepicker-calendar td.selected-stay:not([class*="conflict"]) {
+    background-image: linear-gradient(to right bottom, #80CC55 50%, #80CC55 50%);
+}
+
+.ui-datepicker-calendar td.selected-stay.stay-conflict {
+    background-image: linear-gradient(to right bottom, #FF7D7D 50%, #FF7D7D 50%);
+}
+
+.ui-datepicker-calendar td.selected-stay.arrival-conflict {
+    background-image: linear-gradient(to right bottom, #80CC55 50%, #FF7D7D 50%);
+}
+
+.ui-datepicker-calendar td.selected-stay.departure-conflict {
+    background-image: linear-gradient(to right bottom, #FF7D7D 50%, #80CC55 50%);
+}
+
+/* minimum stay requirement */
+.ui-datepicker-calendar td.selected-arrival.departure-available.minimum-stay-requirement {
+    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #ADE79E 50%);
+}
+
+.ui-datepicker-calendar td.selected-arrival.departure-unavailable.minimum-stay-requirement {
+    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #ADE79E 50%);
+}
+
+.ui-datepicker-calendar td.selected-stay:not([class*="conflict"]).minimum-stay-requirement {
+    background-image: linear-gradient(to right bottom, #ADE79E 50%, #ADE79E 50%);
+}
+
+.ui-datepicker-calendar td.selected-departure.arrival-available.minimum-stay-requirement {
+    background-image: linear-gradient(to right bottom, #ADE79E 50%, #FFFFFF 50%);
+}
+
+.ui-datepicker-calendar td.selected-departure.arrival-unavailable.minimum-stay-requirement {
+    background-image: linear-gradient(to right bottom, #ADE79E 50%, #DDDDDD 50%);
 }
