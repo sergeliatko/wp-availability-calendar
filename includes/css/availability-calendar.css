@@ -33,6 +33,7 @@
 
 .ui-datepicker .ui-icon:before {
     display: inline-block;
+    /*noinspection CssNoGenericFontName*/
     font-family: dashicons;
 }
 
