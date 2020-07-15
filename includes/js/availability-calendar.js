@@ -222,6 +222,25 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     *
+     * @param {string} cssClasses
+     * @param {string} outputFormat
+     * @returns {string|undefined}
+     */
+    function extractDateFromCSSClasses(cssClasses, outputFormat) {
+        let match = null;
+        let regex = /date-key-(\d{4}-\d{2}-\d{2})/;
+        if (
+            ('string' === typeof cssClasses)
+            && (null !== (match = cssClasses.match(regex)))
+            && ('string' === typeof match[1])
+        ) {
+            return convertDate(match[1], dateKeyFormat, outputFormat);
+        }
+        return undefined;
+    }
+
+    /**
      * @param {HTMLElement} calendar
      * @returns {string}
      */
@@ -260,6 +279,59 @@ jQuery(document).ready(function ($) {
     function getCalendarInputField(field, calendar) {
         let id = getCalendarParameter(field + 'Id', calendar);
         return ((null === id) || ('' === id)) ? null : document.getElementById(id);
+    }
+
+    /**
+     * Returns visible fields for the provided calendar.
+     *
+     * @param {string} state
+     * @param {HTMLElement} calendar
+     * @returns {[]}
+     */
+    function getVisibleInputFields(state, calendar) {
+        let fields = [];
+        let types = ['', 'Display'];
+        for (let type in types) {
+            // noinspection JSUnfilteredForInLoop
+            let input = getCalendarInputField(state + types[type], calendar);
+            let inputType = null;
+            if (
+                (null !== input)
+                && (null !== (inputType = input.getAttribute('type')))
+                && ('hidden' !== inputType)
+            ) {
+                fields.push(input);
+            }
+        }
+        return fields;
+    }
+
+    /**
+     * Returns calendar date format or default format string.
+     *
+     * @param {HTMLElement} calendar
+     * @returns {string}
+     */
+    function getCalendarDateFormat(calendar) {
+        let format = getCalendarParameter('dateFormat', calendar);
+        return (
+            ('string' === typeof format)
+            && ('' !== format)
+        ) ? format : availabilityCalendar.defaults.dateFormat;
+    }
+
+    /**
+     * Returns calendar display date format or default display format string.
+     *
+     * @param {HTMLElement} calendar
+     * @returns {string}
+     */
+    function getCalendarDisplayDateFormat(calendar) {
+        let format = getCalendarParameter('dateFormatDisplay', calendar);
+        return (
+            ('string' === typeof format)
+            && ('' !== format)
+        ) ? format : availabilityCalendar.defaults.dateFormatDisplay;
     }
 
     /**
@@ -332,127 +404,17 @@ jQuery(document).ready(function ($) {
     }
 
     /**
-     * Highlights and deems input fields depending the calendar state.
-     *
-     * @param {string} state
-     * @param {HTMLElement} calendar
-     */
-    function highlightInputFields(state, calendar) {
-        let oldState = (arrival === state) ? departure : arrival;
-        getVisibleInputFields(state, calendar).forEach(function (element) {
-            try {
-                // noinspection JSUnresolvedFunction
-                $(element.parentNode).removeClass('calendar-deem').addClass('calendar-highlight');
-            } catch (e) {
-                console.log(e);
-            }
-        });
-        getVisibleInputFields(oldState, calendar).forEach(function (element) {
-            try {
-                // noinspection JSUnresolvedFunction
-                $(element.parentNode).removeClass('calendar-highlight').addClass('calendar-deem');
-            } catch (e) {
-                console.log(e);
-            }
-        });
-    }
-
-    /**
-     * Returns visible fields for the provided calendar.
-     *
-     * @param {string} state
-     * @param {HTMLElement} calendar
-     * @returns {[]}
-     */
-    function getVisibleInputFields(state, calendar) {
-        let fields = [];
-        let types = ['', 'Display'];
-        for (let type in types) {
-            // noinspection JSUnfilteredForInLoop
-            let input = getCalendarInputField(state + types[type], calendar);
-            let inputType = null;
-            if (
-                (null !== input)
-                && (null !== (inputType = input.getAttribute('type')))
-                && ('hidden' !== inputType)
-            ) {
-                fields.push(input);
-            }
-        }
-        return fields;
-    }
-
-    /**
+     * Returns calendar default min stay or global min stay default.
      *
      * @param {HTMLElement} calendar
+     * @returns {number}
      */
-    function updateCalendarCellData(calendar) {
-        //handle show rates
-        if (true === getCalendarParameter('showRates', calendar)) {
-            let format = getCalendarDateFormat(calendar);
-            let dates = getCalendarAvailability(calendar);
-            // noinspection JSUnresolvedFunction
-            $(calendar).find(
-                '.ui-datepicker-calendar td.has-rate[class*="date-key-"] > *[class*="ui-state"]'
-            ).each(function () {
-                //extract date from css class
-                let date = extractDateFromCSSClasses(this.parentNode.className, format);
-                //initiate rate
-                let rate = '';
-                //extract rate data and check all conditions
-                if (
-                    (undefined !== date)
-                    && hasDateData(date, dates)
-                    && ('' !== (rate = getRate(getDateData(date, dates))))
-                    && (0 === $(this.parentNode).find('.rate').length)
-                ) {
-                    //append rate element to cell
-                    let rateElement = document.createElement('span');
-                    rateElement.className = 'rate';
-                    rateElement.appendChild(document.createTextNode(rate));
-                    this.parentNode.appendChild(rateElement);
-                }
-            });
-        }
-        //handle context menu call
-        // noinspection JSUnresolvedFunction
-        $(calendar).find('.ui-datepicker-calendar td[title]').contextmenu(function (event) {
-            event.preventDefault();
-            try {
-                alert(this.getAttribute('title').replace(/\.\s?/gi, ".\n"));
-            } catch (e) {
-                console.log(e);
-            }
-        });
-    }
-
-    /**
-     *
-     * @param {string} cssClasses
-     * @param {string} outputFormat
-     * @returns {string|undefined}
-     */
-    function extractDateFromCSSClasses(cssClasses, outputFormat) {
-        let match = null;
-        let regex = /date-key-(\d{4}-\d{2}-\d{2})/;
-        if (
-            ('string' === typeof cssClasses)
-            && (null !== (match = cssClasses.match(regex)))
-            && ('string' === typeof match[1])
-        ) {
-            return convertDate(match[1], dateKeyFormat, outputFormat);
-        }
-        return undefined;
-    }
-
-    /**
-     *
-     * @param {HTMLElement} calendar
-     */
-    function lateUpdateCalendarCellData(calendar) {
-        window.setTimeout(function (calendar) {
-            updateCalendarCellData(calendar);
-        }, 250, calendar);
+    function getDefaultMinStay(calendar) {
+        let parameters = getCalendarParameters(calendar);
+        let calendarDefault = getObjectProperty('minStay', parameters, 'number');
+        return numberBiggerThanZero(calendarDefault) ?
+            calendarDefault
+            : availabilityCalendar.defaults.minStay;
     }
 
     /**
@@ -547,6 +509,277 @@ jQuery(document).ready(function ($) {
             return isDepartureAllowed(getDateData(date, dates))
         }
         return false;
+    }
+
+    /**
+     * Returns min stay for specific date or calendar default.
+     *
+     * @param {string} dateString
+     * @param {HTMLElement} calendar
+     * @returns {number}
+     */
+    function getMinStay(dateString, calendar) {
+        let dates = getCalendarAvailability(calendar);
+        if (hasDateData(dateString, dates)) {
+            let dateMinStay = getObjectProperty(
+                'minStay',
+                getDateData(dateString, dates),
+                'number'
+            );
+            if (numberBiggerThanZero(dateMinStay)) {
+                return dateMinStay;
+            }
+        }
+        return getDefaultMinStay(calendar);
+    }
+
+    /**
+     *
+     * @param {string} dateString
+     * @param {HTMLElement} calendar
+     * @returns {number}
+     */
+    function getMaxStay(dateString, calendar) {
+        let dates = getCalendarAvailability(calendar);
+        let defaultMaxStay = getCalendarParameter('maxStay', calendar);
+        // noinspection JSUnresolvedVariable
+        return (
+            dates.hasOwnProperty(dateString)
+            //make sure it is a number
+            && ('number' === typeof dates[dateString].maxStay)
+            //make sure it is bigger than zero
+            && (0 < dates[dateString].maxStay)
+        ) ? dates[dateString].maxStay
+            : ((
+                //make sure default is a number
+                ('number' === typeof defaultMaxStay)
+                //and it is bigger than zero
+                && (0 < defaultMaxStay)
+            ) ? defaultMaxStay : availabilityCalendar.defaults.maxStay);
+    }
+
+    /**
+     *
+     * @param {string} arrivalDateString
+     * @param {HTMLElement} calendar
+     * @returns {string}
+     */
+    function getFirstDepartureDateString(arrivalDateString, calendar) {
+        //get format to use
+        let format = getCalendarDateFormat(calendar);
+        return dateToString(
+            dateAddDays(
+                stringToDate(arrivalDateString, format),
+                getMinStay(arrivalDateString, calendar)
+            ),
+            format
+        );
+    }
+
+    /**
+     *
+     * @param {string} arrivalDateString
+     * @param {HTMLElement} calendar
+     * @returns {string}
+     */
+    function getLastDepartureDateString(arrivalDateString, calendar) {
+        //get dates object
+        let dates = getCalendarAvailability(calendar);
+        //if arrival is not available return it back as first conflict
+        // noinspection JSUnresolvedVariable
+        if (!isDateAvailable(arrivalDateString, dates)) {
+            return arrivalDateString;
+        }
+        //get format to use
+        let format = getCalendarDateFormat(calendar);
+        //start by converting arrival to Date
+        let arrivalDate = stringToDate(arrivalDateString, format);
+        let addDays = 1;
+        let newDate = '';
+        //get max stay limit for this date in this calendar
+        let maxStay = getMaxStay(arrivalDateString, calendar);
+        while (isDateAvailable(newDate = dateToString(dateAddDays(arrivalDate, addDays), format), dates)) {
+            //if addDays >= maxStay - return newDate now
+            if (addDays >= maxStay) {
+                return newDate;
+            }
+            //add another day and restart the loop
+            addDays++;
+        }
+        return newDate;
+    }
+
+    /**
+     *
+     * @param {string} startDateString
+     * @param {HTMLElement} calendar
+     * @returns {string}
+     */
+    function getFirstAllowedDepartureDateString(startDateString, calendar) {
+        let dates = getCalendarAvailability(calendar);
+        if (isDateAllowedForDepartures(startDateString, dates)) {
+            return startDateString;
+        }
+        //get format to use
+        let format = getCalendarDateFormat(calendar);
+        let addDays = 1;
+        let newDate = dateToString(
+            dateAddDays(
+                stringToDate(startDateString, format),
+                addDays),
+            format
+        );
+        while (
+            !isDateAllowedForDepartures(newDate, dates)
+            && hasDateData(newDate, dates)
+            ) {
+            //add another day and restart the loop
+            addDays++;
+            newDate = dateToString(
+                dateAddDays(
+                    stringToDate(startDateString, format),
+                    addDays),
+                format
+            )
+        }
+        return newDate;
+    }
+
+    /**
+     * Highlights and deems input fields depending the calendar state.
+     *
+     * @param {string} state
+     * @param {HTMLElement} calendar
+     */
+    function highlightInputFields(state, calendar) {
+        let oldState = (arrival === state) ? departure : arrival;
+        getVisibleInputFields(state, calendar).forEach(function (element) {
+            try {
+                // noinspection JSUnresolvedFunction
+                $(element.parentNode).removeClass('calendar-deem').addClass('calendar-highlight');
+            } catch (e) {
+                console.log(e);
+            }
+        });
+        getVisibleInputFields(oldState, calendar).forEach(function (element) {
+            try {
+                // noinspection JSUnresolvedFunction
+                $(element.parentNode).removeClass('calendar-highlight').addClass('calendar-deem');
+            } catch (e) {
+                console.log(e);
+            }
+        });
+    }
+
+    /**
+     *
+     * @param {string} newDate
+     * @param {string} fieldType
+     * @param {HTMLElement} calendar
+     * @param {string} format
+     * @param {string} displayFormat
+     */
+    function updateCalendarFields(newDate, fieldType, calendar, format, displayFormat) {
+        //update calendar selected date data
+        writeElementData('selected-' + fieldType, newDate, calendar);
+        //get working input field
+        let inputField = getCalendarInputField(fieldType, calendar);
+        inputField.value = newDate;
+        //update calendar display input if present
+        let displayInputField = getCalendarInputField(fieldType + 'Display', calendar);
+        if (null !== displayInputField) {
+            //update display input field with maybe converted new date
+            displayInputField.value = ('' === newDate) ?
+                newDate
+                : convertDate(
+                    newDate,
+                    format,
+                    displayFormat
+                );
+        }
+    }
+
+    /**
+     * Updates calendar and display fields from input fields.
+     *
+     * @param {HTMLElement} calendar
+     */
+    function updateCalendarFromInputs(calendar) {
+        let fields = [arrival, departure];
+        for (let index in fields) {
+            // noinspection JSUnfilteredForInLoop
+            let field = fields[index];
+            let inputField = getCalendarInputField(field, calendar);
+            if (
+                (null !== inputField)
+                && ('string' === typeof inputField.value)
+                && ('' !== inputField.value)
+            ) {
+                writeElementData('selected-' + field, inputField.value, calendar);
+                let displayInputField = getCalendarInputField(field + 'Display', calendar);
+                if (null !== displayInputField) {
+                    displayInputField.value = convertDate(
+                        inputField.value,
+                        getCalendarDateFormat(calendar),
+                        getCalendarDisplayDateFormat(calendar)
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param {HTMLElement} calendar
+     */
+    function updateCalendarCellData(calendar) {
+        //handle show rates
+        if (true === getCalendarParameter('showRates', calendar)) {
+            let format = getCalendarDateFormat(calendar);
+            let dates = getCalendarAvailability(calendar);
+            // noinspection JSUnresolvedFunction
+            $(calendar).find(
+                '.ui-datepicker-calendar td.has-rate[class*="date-key-"] > *[class*="ui-state"]'
+            ).each(function () {
+                //extract date from css class
+                let date = extractDateFromCSSClasses(this.parentNode.className, format);
+                //initiate rate
+                let rate = '';
+                //extract rate data and check all conditions
+                if (
+                    (undefined !== date)
+                    && hasDateData(date, dates)
+                    && ('' !== (rate = getRate(getDateData(date, dates))))
+                    && (0 === $(this.parentNode).find('.rate').length)
+                ) {
+                    //append rate element to cell
+                    let rateElement = document.createElement('span');
+                    rateElement.className = 'rate';
+                    rateElement.appendChild(document.createTextNode(rate));
+                    this.parentNode.appendChild(rateElement);
+                }
+            });
+        }
+        //handle context menu call
+        // noinspection JSUnresolvedFunction
+        $(calendar).find('.ui-datepicker-calendar td[title]').contextmenu(function (event) {
+            event.preventDefault();
+            try {
+                alert(this.getAttribute('title').replace(/\.\s?/gi, ".\n"));
+            } catch (e) {
+                console.log(e);
+            }
+        });
+    }
+
+    /**
+     *
+     * @param {HTMLElement} calendar
+     */
+    function lateUpdateCalendarCellData(calendar) {
+        window.setTimeout(function (calendar) {
+            updateCalendarCellData(calendar);
+        }, 250, calendar);
     }
 
     /**
@@ -872,239 +1105,6 @@ jQuery(document).ready(function ($) {
         );
         //change calendar state
         switchCalendarState(calendar);
-    }
-
-    /**
-     *
-     * @param {string} newDate
-     * @param {string} fieldType
-     * @param {HTMLElement} calendar
-     * @param {string} format
-     * @param {string} displayFormat
-     */
-    function updateCalendarFields(newDate, fieldType, calendar, format, displayFormat) {
-        //update calendar selected date data
-        writeElementData('selected-' + fieldType, newDate, calendar);
-        //get working input field
-        let inputField = getCalendarInputField(fieldType, calendar);
-        inputField.value = newDate;
-        //update calendar display input if present
-        let displayInputField = getCalendarInputField(fieldType + 'Display', calendar);
-        if (null !== displayInputField) {
-            //update display input field with maybe converted new date
-            displayInputField.value = ('' === newDate) ?
-                newDate
-                : convertDate(
-                    newDate,
-                    format,
-                    displayFormat
-                );
-        }
-    }
-
-    /**
-     *
-     * @param {string} arrivalDateString
-     * @param {HTMLElement} calendar
-     * @returns {string}
-     */
-    function getFirstDepartureDateString(arrivalDateString, calendar) {
-        //get format to use
-        let format = getCalendarDateFormat(calendar);
-        return dateToString(
-            dateAddDays(
-                stringToDate(arrivalDateString, format),
-                getMinStay(arrivalDateString, calendar)
-            ),
-            format
-        );
-    }
-
-    /**
-     * Returns min stay for specific date or calendar default.
-     *
-     * @param {string} dateString
-     * @param {HTMLElement} calendar
-     * @returns {number}
-     */
-    function getMinStay(dateString, calendar) {
-        let dates = getCalendarAvailability(calendar);
-        if (hasDateData(dateString, dates)) {
-            let dateMinStay = getObjectProperty(
-                'minStay',
-                getDateData(dateString, dates),
-                'number'
-            );
-            if (numberBiggerThanZero(dateMinStay)) {
-                return dateMinStay;
-            }
-        }
-        return getDefaultMinStay(calendar);
-    }
-
-    /**
-     * Returns calendar default min stay or global min stay default.
-     *
-     * @param {HTMLElement} calendar
-     * @returns {number}
-     */
-    function getDefaultMinStay(calendar) {
-        let parameters = getCalendarParameters(calendar);
-        let calendarDefault = getObjectProperty('minStay', parameters, 'number');
-        return numberBiggerThanZero(calendarDefault) ?
-            calendarDefault
-            : availabilityCalendar.defaults.minStay;
-    }
-
-    /**
-     *
-     * @param {string} arrivalDateString
-     * @param {HTMLElement} calendar
-     * @returns {string}
-     */
-    function getLastDepartureDateString(arrivalDateString, calendar) {
-        //get dates object
-        let dates = getCalendarAvailability(calendar);
-        //if arrival is not available return it back as first conflict
-        // noinspection JSUnresolvedVariable
-        if (!isDateAvailable(arrivalDateString, dates)) {
-            return arrivalDateString;
-        }
-        //get format to use
-        let format = getCalendarDateFormat(calendar);
-        //start by converting arrival to Date
-        let arrivalDate = stringToDate(arrivalDateString, format);
-        let addDays = 1;
-        let newDate = '';
-        //get max stay limit for this date in this calendar
-        let maxStay = getMaxStay(arrivalDateString, calendar);
-        while (isDateAvailable(newDate = dateToString(dateAddDays(arrivalDate, addDays), format), dates)) {
-            //if addDays >= maxStay - return newDate now
-            if (addDays >= maxStay) {
-                return newDate;
-            }
-            //add another day and restart the loop
-            addDays++;
-        }
-        return newDate;
-    }
-
-    /**
-     *
-     * @param {string} dateString
-     * @param {HTMLElement} calendar
-     * @returns {number}
-     */
-    function getMaxStay(dateString, calendar) {
-        let dates = getCalendarAvailability(calendar);
-        let defaultMaxStay = getCalendarParameter('maxStay', calendar);
-        // noinspection JSUnresolvedVariable
-        return (
-            dates.hasOwnProperty(dateString)
-            //make sure it is a number
-            && ('number' === typeof dates[dateString].maxStay)
-            //make sure it is bigger than zero
-            && (0 < dates[dateString].maxStay)
-        ) ? dates[dateString].maxStay
-            : ((
-                //make sure default is a number
-                ('number' === typeof defaultMaxStay)
-                //and it is bigger than zero
-                && (0 < defaultMaxStay)
-            ) ? defaultMaxStay : availabilityCalendar.defaults.maxStay);
-    }
-
-    /**
-     *
-     * @param {string} startDateString
-     * @param {HTMLElement} calendar
-     * @returns {string}
-     */
-    function getFirstAllowedDepartureDateString(startDateString, calendar) {
-        let dates = getCalendarAvailability(calendar);
-        if (isDateAllowedForDepartures(startDateString, dates)) {
-            return startDateString;
-        }
-        //get format to use
-        let format = getCalendarDateFormat(calendar);
-        let addDays = 1;
-        let newDate = dateToString(
-            dateAddDays(
-                stringToDate(startDateString, format),
-                addDays),
-            format
-        );
-        while (
-            !isDateAllowedForDepartures(newDate, dates)
-            && hasDateData(newDate, dates)
-            ) {
-            //add another day and restart the loop
-            addDays++;
-            newDate = dateToString(
-                dateAddDays(
-                    stringToDate(startDateString, format),
-                    addDays),
-                format
-            )
-        }
-        return newDate;
-    }
-
-    /**
-     * Returns calendar date format or default format string.
-     *
-     * @param {HTMLElement} calendar
-     * @returns {string}
-     */
-    function getCalendarDateFormat(calendar) {
-        let format = getCalendarParameter('dateFormat', calendar);
-        return (
-            ('string' === typeof format)
-            && ('' !== format)
-        ) ? format : availabilityCalendar.defaults.dateFormat;
-    }
-
-    /**
-     * Returns calendar display date format or default display format string.
-     *
-     * @param {HTMLElement} calendar
-     * @returns {string}
-     */
-    function getCalendarDisplayDateFormat(calendar) {
-        let format = getCalendarParameter('dateFormatDisplay', calendar);
-        return (
-            ('string' === typeof format)
-            && ('' !== format)
-        ) ? format : availabilityCalendar.defaults.dateFormatDisplay;
-    }
-
-    /**
-     * Updates calendar and display fields from input fields.
-     *
-     * @param {HTMLElement} calendar
-     */
-    function updateCalendarFromInputs(calendar) {
-        let fields = [arrival, departure];
-        for (let index in fields) {
-            // noinspection JSUnfilteredForInLoop
-            let field = fields[index];
-            let inputField = getCalendarInputField(field, calendar);
-            if (
-                (null !== inputField)
-                && ('string' === typeof inputField.value)
-                && ('' !== inputField.value)
-            ) {
-                writeElementData('selected-' + field, inputField.value, calendar);
-                let displayInputField = getCalendarInputField(field + 'Display', calendar);
-                if (null !== displayInputField) {
-                    displayInputField.value = convertDate(
-                        inputField.value,
-                        getCalendarDateFormat(calendar),
-                        getCalendarDisplayDateFormat(calendar)
-                    );
-                }
-            }
-        }
     }
 
     /**
