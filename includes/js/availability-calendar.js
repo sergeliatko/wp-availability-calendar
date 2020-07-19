@@ -314,6 +314,7 @@ jQuery(document).ready(function ($) {
      */
     function getCalendarDateFormat(calendar) {
         let format = getCalendarParameter('dateFormat', calendar);
+        // noinspection JSUnresolvedVariable
         return (
             ('string' === typeof format)
             && ('' !== format)
@@ -328,6 +329,7 @@ jQuery(document).ready(function ($) {
      */
     function getCalendarDisplayDateFormat(calendar) {
         let format = getCalendarParameter('dateFormatDisplay', calendar);
+        // noinspection JSUnresolvedVariable
         return (
             ('string' === typeof format)
             && ('' !== format)
@@ -412,6 +414,7 @@ jQuery(document).ready(function ($) {
     function getDefaultMinStay(calendar) {
         let parameters = getCalendarParameters(calendar);
         let calendarDefault = getObjectProperty('minStay', parameters, 'number');
+        // noinspection JSUnresolvedVariable
         return numberBiggerThanZero(calendarDefault) ?
             calendarDefault
             : availabilityCalendar.defaults.minStay;
@@ -807,6 +810,20 @@ jQuery(document).ready(function ($) {
         classes.push('date-key-' + theDateKey);
 
         //HANDLE FLAGS AND CLASSES
+        //BEFORE MIN DATE
+        //check if the date is before min date
+        let beforeMinDate = (theDate < stringToDate(getCalendarParameter('firstDate', this), format));
+        //handle classes before min date
+        if (beforeMinDate) {
+            classes.push('before-min-date');
+        }
+        //AFTER MAX DATE
+        //check if the date is after max date
+        let afterMaxDate = (theDate > stringToDate(getCalendarParameter('lastDate', this), format));
+        //handle class after max date
+        if (afterMaxDate) {
+            classes.push('after-max-date');
+        }
         //DATA
         //check if we have data for the current date
         let hasData = hasDateData(theDateString, dates);
@@ -823,30 +840,12 @@ jQuery(document).ready(function ($) {
         let rate = getRate(dateData);
         //check if we have rates
         let hasRate = ('' !== rate);
-        //handle rate class
-        classes.push(hasRate ? 'has-rate' : 'no-rate');
-        //handle rate message
-        if (hasRate) {
-            messages.push(availabilityCalendar.messages.rate.replace('{rate}', rate));
-        }
-        //handle minimum stay message
-        messages.push(availabilityCalendar.messages.minStay.replace(
-            '{minStay}',
-            getMinStay(theDateString, this)
-        ));
-        //BEFORE MIN DATE
-        //check if the date is before min date
-        let beforeMinDate = (theDate < stringToDate(getCalendarParameter('firstDate', this), format));
-        //handle classes before min date
-        if (beforeMinDate) {
-            classes.push('before-min-date');
-        }
-        //AFTER MAX DATE
-        //check if the date is after max date
-        let afterMaxDate = (theDate > stringToDate(getCalendarParameter('lastDate', this), format));
-        //handle class after max date
-        if (afterMaxDate) {
-            classes.push('after-max-date');
+        if (
+            !beforeMinDate
+            && !afterMaxDate
+        ) {
+            //handle rate class
+            classes.push(hasRate ? 'has-rate' : 'no-rate');
         }
         //AVAILABILITIES
         //check if arrival is available
@@ -857,12 +856,6 @@ jQuery(document).ready(function ($) {
         );
         //handle class
         classes.push(arrivalAvailable ? 'arrival-available' : 'arrival-unavailable');
-        //handle availability message
-        messages.push(
-            arrivalAvailable ?
-                availabilityCalendar.messages.available
-                : availabilityCalendar.messages.unavailable
-        );
         //check if departure is available
         //get yesterday date
         let yesterdayData = getDateData(dateToString(dateAddDays(theDate, -1), format), dates);
@@ -878,23 +871,48 @@ jQuery(document).ready(function ($) {
         let arrivalAllowed = isArrivalAllowed(dateData);
         //handle class
         classes.push(arrivalAllowed ? 'arrival-allowed' : 'arrival-prohibited');
-        //handle messages
-        messages.push(
-            arrivalAllowed ?
-                availabilityCalendar.messages.arrivalsAllowed
-                : availabilityCalendar.messages.arrivalsNotAllowed
-        );
         //check if departures are allowed
         let departureAllowed = isDepartureAllowed(dateData);
         //handle class
         classes.push(departureAllowed ? 'departure-allowed' : 'departure-prohibited');
-        //handle messages
-        //handle messages
-        messages.push(
-            departureAllowed ?
-                availabilityCalendar.messages.departuresAllowed
-                : availabilityCalendar.messages.departuresNotAllowed
-        );
+        //handle basic messages
+        if (
+            !beforeMinDate
+            && !afterMaxDate
+        ) {
+            //handle rate message
+            if (hasRate) {
+                // noinspection JSUnresolvedVariable
+                messages.push(availabilityCalendar.messages.rate.replace('{rate}', rate));
+            }
+            //handle minimum stay message
+            // noinspection JSUnresolvedVariable
+            messages.push(availabilityCalendar.messages.minimumStay.replace(
+                '{minimumStay}',
+                getMinStay(theDateString, this)
+            ));
+            //handle availability message
+            // noinspection JSUnresolvedVariable
+            messages.push(
+                arrivalAvailable ?
+                    availabilityCalendar.messages.available
+                    : availabilityCalendar.messages.unavailable
+            );
+            //handle arrival allowance messages
+            // noinspection JSUnresolvedVariable
+            messages.push(
+                arrivalAllowed ?
+                    availabilityCalendar.messages.arrivalsAllowed
+                    : availabilityCalendar.messages.arrivalsNotAllowed
+            );
+            //handle departure allowance messages
+            // noinspection JSUnresolvedVariable
+            messages.push(
+                departureAllowed ?
+                    availabilityCalendar.messages.departuresAllowed
+                    : availabilityCalendar.messages.departuresNotAllowed
+            );
+        }
         //ARRIVAL / DEPARTURE POSSIBILITIES
         let canArrive = (arrivalAvailable && arrivalAllowed);
         let canDepart = (departureAvailable && departureAllowed);
@@ -909,6 +927,7 @@ jQuery(document).ready(function ($) {
         );
         if (selectedArrival) {
             classes.push('selected-arrival');
+            // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.selectedArrival);
             //handle case when unable to arrive
             if (
@@ -930,6 +949,7 @@ jQuery(document).ready(function ($) {
         );
         if (selectedDeparture) {
             classes.push('selected-departure');
+            // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.selectedDeparture);
             //handle case when departure is not possible
             if (
@@ -949,6 +969,7 @@ jQuery(document).ready(function ($) {
             && ((selectedArrivalDate < theDate) && (theDate < selectedDepartureDate))
         ) {
             classes.push('selected-stay');
+            // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.selectedStay);
             //handle cases with conflict
             if (
@@ -970,7 +991,8 @@ jQuery(document).ready(function ($) {
             }
         }
         if (true === conflictMessage) {
-            messages.push(availabilityCalendar.messages.conflict);
+            // noinspection JSUnresolvedVariable
+            messages.push(availabilityCalendar.messages.selectedDatesConflict);
         }
         //MINIMUM STAY IN DEPARTURE STATE
         let minDepartureDateString = readElementData('first-departure', this);
@@ -996,10 +1018,12 @@ jQuery(document).ready(function ($) {
                 minStayMessage = true;
             } else if (theDateString === minDepartureDateString) {
                 classes.push('minimum-stay-requirement selected-departure');
+                // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.firstAvailableDeparture);
             }
             if (true === minStayMessage) {
-                messages.push(availabilityCalendar.messages.inMinStayPeriod);
+                // noinspection JSUnresolvedVariable
+                messages.push(availabilityCalendar.messages.minimumStayPeriod);
             }
         }
 
@@ -1054,8 +1078,10 @@ jQuery(document).ready(function ($) {
                 instance.settings.dateFormat
             )) {
                 //minimum stay requirement is not met - alert guest and return
-                messages.push(availabilityCalendar.messages.minStayRequirementViolated);
-                messages.push(availabilityCalendar.messages.chooseAnotherDate);
+                // noinspection JSUnresolvedVariable
+                messages.push(availabilityCalendar.messages.arrivalImpossible);
+                // noinspection JSUnresolvedVariable
+                messages.push(availabilityCalendar.messages.selectAnotherDate);
                 alert(messages.join("\n"));
                 lateUpdateCalendarCellData(calendar);
                 return;
@@ -1069,8 +1095,10 @@ jQuery(document).ready(function ($) {
                 instance.settings.dateFormat
             )) {
                 //first allowed departure date is not selectable
-                messages.push(availabilityCalendar.messages.firstAllowedDepartureInaccessible);
-                messages.push(availabilityCalendar.messages.chooseAnotherDate);
+                // noinspection JSUnresolvedVariable
+                messages.push(availabilityCalendar.messages.departureImpossible);
+                // noinspection JSUnresolvedVariable
+                messages.push(availabilityCalendar.messages.selectAnotherDate);
                 alert(messages.join("\n"));
                 lateUpdateCalendarCellData(calendar);
                 return;
@@ -1139,6 +1167,9 @@ jQuery(document).ready(function ($) {
             //show rates
             onChangeMonthYear: function () {
                 lateUpdateCalendarCellData(this);
+            },
+            onSelect: function () {
+                lateUpdateCalendarCellData(this);
             }
         };
         //see what type of calendar we have
@@ -1160,35 +1191,6 @@ jQuery(document).ready(function ($) {
                 break;
         }
         lateUpdateCalendarCellData(calendar);
-    }
-
-    //todo: handle in availabilityCalendar.messages
-    availabilityCalendar.messages = {
-        chooseAnotherDate: 'Please, choose another date or call us for assistance.',
-        minStayRequirementViolated: 'Sorry, minimum stay requirement does not allow to arrive on this date.',
-        firstAllowedDepartureInaccessible: 'Sorry, first allowed departure date is unavailable if you arrive on this date.',
-        rate: 'Rates from {rate}/night.',
-        minStay: 'Minimum stay is {minStay} night(s).',
-        selectedArrival: 'Your selected arrival date.',
-        selectedStay: 'Your selected stay.',
-        selectedDeparture: 'Your selected departure.',
-        conflict: 'Conflicts with your selected dates.',
-        available: 'Available.',
-        unavailable: 'Booked.',
-        arrivalsAllowed: 'Arrivals allowed.',
-        departuresAllowed: 'Departures allowed.',
-        arrivalsNotAllowed: 'Arrivals are not allowed.',
-        departuresNotAllowed: 'Departures are not allowed.',
-        inMinStayPeriod: 'In minimum stay period.',
-        firstAvailableDeparture: 'First available departure.'
-    };
-
-    //todo: handle in availabilityCalendar.defaults
-    availabilityCalendar.defaults = {
-        dateFormat: 'yy-mm-dd',
-        dateFormatDisplay: 'yy-mm-dd',
-        maxStay: 180,
-        minStay: 1
     }
 
     // noinspection JSUnresolvedFunction
