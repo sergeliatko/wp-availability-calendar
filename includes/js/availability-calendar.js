@@ -1140,7 +1140,6 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function initiateCalendar(order, calendar) {
-        console.log(availabilityCalendar);
         //populate calendar dates from before drawing calendar
         updateCalendarFromInputs(calendar);
         //on init set calendar to 'arrival' state
