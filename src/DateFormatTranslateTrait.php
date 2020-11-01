@@ -15,8 +15,8 @@ trait DateFormatTranslateTrait {
 	 *
 	 * @return string
 	 */
-	protected static function PHPDateFormatToJSDatePicker( string $format ): string {
-		$rules         = array(
+	public static function PHPDateFormatToJSDatePicker( string $format ): string {
+		$rules = array(
 			// Day
 			'd' => 'dd',
 			'D' => 'D',
