@@ -200,7 +200,6 @@ class Core {
 			'unknownError'            => 'An error occurred. Please retry or contact us for assistance.',
 			'selectAnotherDate'       => 'Please select another date or call us for assistance.',
 			'arrivalImpossible'       => 'Sorry, minimum stay requirement does not allow to arrive on this date.',
-			'departureImpossible'     => 'Sorry, we could not find any available departure date if your arrive on this date.',
 		) );
 	}
 

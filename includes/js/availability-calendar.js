@@ -188,6 +188,28 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     * Checks if given date string is prior to another date string or same in specific format.
+     *
+     * @param {string} date
+     * @param {string} before
+     * @param {string} format
+     * @returns {boolean}
+     */
+    function isDateStringBeforeOrEqual(date, before, format) {
+        //compare same dates as strings
+        if (date === before) {
+            return true;
+        }
+        let theDate = stringToDate(date, format);
+        let deadLine = stringToDate(before, format);
+        return (
+            (null !== theDate)
+            && (null !== deadLine)
+            && (theDate < deadLine)
+        );
+    }
+
+    /**
      * Checks if given date string is within period defined by other two date strings in specific format.
      *
      * @param {string} dateString
@@ -567,7 +589,7 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      * @returns {string}
      */
-    function getFirstDepartureDateString(arrivalDateString, calendar) {
+    function getMinimumStayUntilDateString(arrivalDateString, calendar) {
         //get format to use
         let format = getCalendarDateFormat(calendar);
         return dateToString(
@@ -585,7 +607,7 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      * @returns {string}
      */
-    function getLastDepartureDateString(arrivalDateString, calendar) {
+    function getMustDepartOnDateString(arrivalDateString, calendar) {
         //get dates object
         let dates = getCalendarAvailability(calendar);
         //if arrival is not available return it back as first conflict
@@ -623,6 +645,8 @@ jQuery(document).ready(function ($) {
         if (isDateAllowedForDepartures(startDateString, dates)) {
             return startDateString;
         }
+        //get calendar last date
+        let lastDate = getCalendarParameter('lastDate', calendar);
         //get format to use
         let format = getCalendarDateFormat(calendar);
         let addDays = 1;
@@ -634,7 +658,7 @@ jQuery(document).ready(function ($) {
         );
         while (
             !isDateAllowedForDepartures(newDate, dates)
-            && hasDateData(newDate, dates)
+            && isDateStringBeforeOrEqual(newDate, lastDate, format)
             ) {
             //add another day and restart the loop
             addDays++;
@@ -1068,35 +1092,22 @@ jQuery(document).ready(function ($) {
             //initiate messages
             let messages = [];
             //get format
-            let lastDepartureDateString = getLastDepartureDateString(dateString, calendar);
-            let firstDepartureDateString = getFirstDepartureDateString(dateString, calendar);
-            //check minimum stay requirement
+            let mustDepartOnDateString = getMustDepartOnDateString(dateString, calendar);
+            let minimumStayUntilDateString = getMinimumStayUntilDateString(dateString, calendar);
+            let firstAllowedDepartureDateString = getFirstAllowedDepartureDateString(
+                minimumStayUntilDateString,
+                calendar
+            );
+            //alert guest if they cannot arrive on this date as because they will have to leave before they are allowed to
             // noinspection JSUnresolvedVariable
             if (isDateStringBefore(
-                lastDepartureDateString,
-                firstDepartureDateString,
+                mustDepartOnDateString,
+                firstAllowedDepartureDateString,
                 instance.settings.dateFormat
             )) {
                 //minimum stay requirement is not met - alert guest and return
                 // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.arrivalImpossible);
-                // noinspection JSUnresolvedVariable
-                messages.push(availabilityCalendar.messages.selectAnotherDate);
-                alert(messages.join("\n"));
-                lateUpdateCalendarCellData(calendar);
-                return;
-            }
-            //exit with error if departure date is not selectable
-            // noinspection JSUnresolvedVariable
-            if (!isDateStringInRange(
-                getFirstAllowedDepartureDateString(firstDepartureDateString, calendar),
-                firstDepartureDateString,
-                lastDepartureDateString,
-                instance.settings.dateFormat
-            )) {
-                //first allowed departure date is not selectable
-                // noinspection JSUnresolvedVariable
-                messages.push(availabilityCalendar.messages.departureImpossible);
                 // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.selectAnotherDate);
                 alert(messages.join("\n"));
@@ -1114,8 +1125,8 @@ jQuery(document).ready(function ($) {
                 instance.settings.altFormat
             );
             //store first and last departure dates in calendar itself to limit the selectable range
-            writeElementData('first-departure', firstDepartureDateString, calendar);
-            writeElementData('last-departure', lastDepartureDateString, calendar);
+            writeElementData('first-departure', firstAllowedDepartureDateString, calendar);
+            writeElementData('last-departure', mustDepartOnDateString, calendar);
         }
         //calendar got selected departure date - clear first and last departure dates data to remove limits
         else if (departure === state) {
@@ -1140,10 +1151,13 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function initiateCalendar(order, calendar) {
-        //populate calendar dates from before drawing calendar
+        //populate calendar dates from inputs before drawing calendar
         updateCalendarFromInputs(calendar);
         //on init set calendar to 'arrival' state
         setCalendarState(calendar, arrival);
+        //grab currently selected date if any
+        let arrivalInput = getCalendarInputField(arrival, calendar);
+        let defaultDate = ((null === arrivalInput) || ('' === arrivalInput.value)) ? null : arrivalInput.value;
         //grab calendar parameters
         let calendarParameters = getCalendarParameters(calendar);
         // noinspection JSUnresolvedVariable
@@ -1155,7 +1169,7 @@ jQuery(document).ready(function ($) {
             dateFormat: calendarParameters.dateFormat,
             //handle week start and current day
             firstDay: calendarParameters.weekStart,
-            defaultDate: null,
+            defaultDate: defaultDate,
             gotoCurrent: true,
             //max and min dates
             maxDate: calendarParameters.lastDate,
