@@ -164,11 +164,17 @@
 
 /* ui logic */
 
-.calendar-highlight > input {
+.calendar-highlight {
     opacity: 1;
 }
 
-.calendar-deem > input {
+.calendar-highlight > input {
+    background-color: #FFFFFF !important;
+    border: 1px solid #000000 !important;
+    color: #000000;
+}
+
+.calendar-deem {
     opacity: .65;
 }
 
