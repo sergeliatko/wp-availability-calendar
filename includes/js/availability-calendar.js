@@ -1147,6 +1147,15 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     *
+     * @param {HTMLElement} calendar
+     * @returns {number}
+     */
+    function fitCalendars(calendar) {
+        return Math.floor(calendar.offsetWidth / 295);
+    }
+
+    /**
      * @param {number} order
      * @param {HTMLElement} calendar
      */
@@ -1176,7 +1185,7 @@ jQuery(document).ready(function ($) {
             minDate: calendarParameters.firstDate,
             //months display
             showOtherMonths: false,
-            numberOfMonths: 3,
+            numberOfMonths: fitCalendars(calendar),
             //show rates
             onChangeMonthYear: function () {
                 lateUpdateCalendarCellData(this);

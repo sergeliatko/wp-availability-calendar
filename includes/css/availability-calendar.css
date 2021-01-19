@@ -1,12 +1,17 @@
-/* STRUCTURE */
-.ui-datepicker .ui-datepicker-prev,
-.ui-datepicker .ui-datepicker-next {
-    color: inherit;
+/* variables */
+.ui-datepicker {
+    --default: #E8E8E8;
+    --available: #FFFFFF;
+    --unavailable: #E8E8E8;
+    --preselected: #C1E2B9;
+    --selected: #6AB044;
+    --conflict: #F06A6A;
 }
 
-.ui-datepicker .ui-datepicker-prev.ui-state-disabled,
-.ui-datepicker .ui-datepicker-next.ui-state-disabled {
-    opacity: .35;
+/* structure */
+.ui-datepicker-header {
+    position: relative;
+    padding-bottom: 0.75em;
 }
 
 .ui-corner-left .ui-datepicker-prev,
@@ -25,28 +30,60 @@
 
 .ui-datepicker .ui-icon {
     cursor: pointer;
-    height: 1em;
-    width: 1em;
     display: block;
+    width: 1em;
     overflow: hidden;
+    white-space: nowrap;
+}
+
+.ui-datepicker .ui-state-disabled .ui-icon {
+    cursor: default;
+    opacity: 0.35;
 }
 
 .ui-datepicker .ui-icon:before {
     display: inline-block;
-    /*noinspection CssNoGenericFontName*/
-    font-family: dashicons;
+    content: "";
+    margin-right: 1em;
+    height: 0;
+    width: 0;
+    opacity: 0.65;
 }
 
 .ui-datepicker .ui-icon.ui-icon-circle-triangle-w:before {
-    content: "\f341";
+    border-top: 0.5em solid transparent;
+    border-bottom: 0.5em solid transparent;
+    border-right: 0.5em solid;
 }
 
 .ui-datepicker .ui-icon.ui-icon-circle-triangle-e:before {
-    content: "\f345";
+    border-top: 0.5em solid transparent;
+    border-bottom: 0.5em solid transparent;
+    border-left: 0.5em solid;
 }
 
+.ui-datepicker-calendar {
+    border-collapse: collapse;
+    border: 1px solid #DDDDDD;
+    margin: 0 auto;
+    width: auto;
+}
 
-.ui-datepicker.ui-datepicker-inline.ui-datepicker-multi {
+.ui-datepicker-calendar th,
+.ui-datepicker-calendar td {
+    box-sizing: border-box;
+    border: 1px solid #DDDDDD;
+    padding: 0.25em;
+    height: 3em;
+    width: 3em;
+}
+
+.ui-datepicker-calendar th {
+    height: 2em;
+}
+
+/* multiple calendars */
+.ui-datepicker-multi {
     box-sizing: border-box;
     clear: both;
     display: flex !important;
@@ -59,78 +96,52 @@
     width: 100% !important;
 }
 
-.ui-datepicker.ui-datepicker-inline.ui-datepicker-multi .ui-datepicker-row-break {
-    box-sizing: border-box;
-    clear: both;
+.ui-datepicker-multi .ui-datepicker-group {
+    flex: 0 1 auto;
+    align-self: auto;
+}
+
+.ui-datepicker-multi .ui-datepicker-row-break {
     display: block;
     margin: 0;
     padding: 0;
     width: 100%;
 }
 
-.ui-datepicker.ui-datepicker-inline.ui-datepicker-multi .ui-datepicker-group {
-    flex: 0 1 auto;
-    max-width: 100%;
-    width: 17.55rem;
-}
+/* typography */
 
 .ui-datepicker-header {
-    text-align: center;
-    position: relative;
-    font-size: 1.125rem;
-    line-height: 1.375;
-}
-
-.ui-datepicker-calendar {
-    border-collapse: collapse;
-    font-size: 1.25rem;
-    line-height: 1.125;
+    font-size: 16px;
+    line-height: 1.2;
     text-align: center;
 }
 
 .ui-datepicker-calendar th,
 .ui-datepicker-calendar td {
-    box-sizing: border-box;
-    border: 1px solid;
+    font-size: 14px;
     font-weight: lighter;
-    margin: 0;
-    padding: .125rem;
-    width: 2.5rem;
-}
-
-.ui-datepicker-calendar td {
-    height: 2.5rem;
+    line-height: 1.25;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .ui-datepicker-calendar th.ui-datepicker-week-end,
 .ui-datepicker-calendar td.ui-datepicker-week-end {
-    font-weight: normal;
+    font-weight: bold;
 }
 
-.ui-datepicker-calendar td > a {
+.ui-datepicker-calendar a,
+.ui-datepicker-prev,
+.ui-datepicker-next {
     color: inherit;
     text-decoration: none;
 }
 
-/* NIGHTLY RATES */
 .ui-datepicker-calendar .rate {
     display: block;
-    font-size: .5625rem;
-    font-weight: lighter;
-    opacity: .85;
+    font-size: 0.675em;
+    opacity: 0.65;
     white-space: nowrap;
-}
-
-/* UI LOGIC */
-
-.calendar-highlight > input {
-    color: #000000;
-    border-color: #000000;
-    opacity: 1;
-}
-
-.calendar-deem > input {
-    opacity: .85;
 }
 
 /* defaults */
@@ -144,99 +155,107 @@
 
 .ui-datepicker-calendar td.ui-datepicker-unselectable > .ui-state-default {
     text-decoration: line-through;
-    opacity: .65;
+    opacity: .55;
 }
 
 .ui-datepicker-calendar td {
-    background-color: #EFEFEF;
+    background-color: var(--default);
 }
 
-/* availability */
+/* ui logic */
+
+.calendar-highlight > input {
+    opacity: 1;
+}
+
+.calendar-deem > input {
+    opacity: .65;
+}
+
 .ui-datepicker-calendar td.arrival-available.departure-available {
-    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #FFFFFF 50%);
+    background-image: linear-gradient(to right bottom, var(--available) 50%, var(--available) 50%);
 }
 
 .ui-datepicker-calendar td.arrival-available.departure-unavailable {
-    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #FFFFFF 50%);
+    background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--available) 50%);
 }
 
 .ui-datepicker-calendar td.arrival-unavailable.departure-available {
-    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #DDDDDD 50%);
+    background-image: linear-gradient(to right bottom, var(--available) 50%, var(--unavailable) 50%);
 }
 
 .ui-datepicker-calendar td.arrival-unavailable.departure-unavailable {
-    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #DDDDDD 50%);
+    background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--unavailable) 50%);
 }
 
-/* slected period */
-/* slected arrival */
+/* arrival */
 .ui-datepicker-calendar td.selected-arrival.departure-available {
-    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #80CC55 50%);
+    background-image: linear-gradient(to right bottom, var(--available) 50%, var(--selected) 50%);
 }
 
 .ui-datepicker-calendar td.selected-arrival.departure-unavailable {
-    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #80CC55 50%);
+    background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--selected) 50%);
 }
 
 .ui-datepicker-calendar td.selected-arrival.arrival-conflict.departure-available {
-    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #FF7D7D 50%);
+    background-image: linear-gradient(to right bottom, var(--available) 50%, var(--conflict) 50%);
 }
 
 .ui-datepicker-calendar td.selected-arrival.arrival-conflict.departure-unavailable {
-    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #FF7D7D 50%);
+    background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--conflict) 50%);
 }
 
-/* slected departure */
+/* departure */
 .ui-datepicker-calendar td.selected-departure.arrival-available {
-    background-image: linear-gradient(to right bottom, #80CC55 50%, #FFFFFF 50%);
+    background-image: linear-gradient(to right bottom, var(--selected) 50%, var(--available) 50%);
 }
 
 .ui-datepicker-calendar td.selected-departure.arrival-unavailable {
-    background-image: linear-gradient(to right bottom, #80CC55 50%, #DDDDDD 50%);
+    background-image: linear-gradient(to right bottom, var(--selected) 50%, var(--unavailable) 50%);
 }
 
 .ui-datepicker-calendar td.selected-departure.departure-conflict.arrival-available {
-    background-image: linear-gradient(to right bottom, #FF7D7D 50%, #FFFFFF 50%);
+    background-image: linear-gradient(to right bottom, var(--conflict) 50%, var(--available) 50%);
 }
 
 .ui-datepicker-calendar td.selected-departure.departure-conflict.arrival-unavailable {
-    background-image: linear-gradient(to right bottom, #FF7D7D 50%, #DDDDDD 50%);
+    background-image: linear-gradient(to right bottom, var(--conflict) 50%, var(--unavailable) 50%);
 }
 
 /* selected stay */
 .ui-datepicker-calendar td.selected-stay:not([class*="conflict"]) {
-    background-image: linear-gradient(to right bottom, #80CC55 50%, #80CC55 50%);
+    background-image: linear-gradient(to right bottom, var(--selected) 50%, var(--selected) 50%);
 }
 
 .ui-datepicker-calendar td.selected-stay.stay-conflict {
-    background-image: linear-gradient(to right bottom, #FF7D7D 50%, #FF7D7D 50%);
+    background-image: linear-gradient(to right bottom, var(--conflict) 50%, var(--conflict) 50%);
 }
 
 .ui-datepicker-calendar td.selected-stay.arrival-conflict {
-    background-image: linear-gradient(to right bottom, #80CC55 50%, #FF7D7D 50%);
+    background-image: linear-gradient(to right bottom, var(--selected) 50%, var(--conflict) 50%);
 }
 
 .ui-datepicker-calendar td.selected-stay.departure-conflict {
-    background-image: linear-gradient(to right bottom, #FF7D7D 50%, #80CC55 50%);
+    background-image: linear-gradient(to right bottom, var(--conflict) 50%, var(--selected) 50%);
 }
 
 /* minimum stay requirement */
 .ui-datepicker-calendar td.selected-arrival.departure-available.minimum-stay-requirement {
-    background-image: linear-gradient(to right bottom, #FFFFFF 50%, #ADE79E 50%);
+    background-image: linear-gradient(to right bottom, var(--available) 50%, var(--preselected) 50%);
 }
 
 .ui-datepicker-calendar td.selected-arrival.departure-unavailable.minimum-stay-requirement {
-    background-image: linear-gradient(to right bottom, #DDDDDD 50%, #ADE79E 50%);
+    background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--preselected) 50%);
 }
 
 .ui-datepicker-calendar td.selected-stay:not([class*="conflict"]).minimum-stay-requirement {
-    background-image: linear-gradient(to right bottom, #ADE79E 50%, #ADE79E 50%);
+    background-image: linear-gradient(to right bottom, var(--preselected) 50%, var(--preselected) 50%);
 }
 
 .ui-datepicker-calendar td.selected-departure.arrival-available.minimum-stay-requirement {
-    background-image: linear-gradient(to right bottom, #ADE79E 50%, #FFFFFF 50%);
+    background-image: linear-gradient(to right bottom, var(--preselected) 50%, var(--available) 50%);
 }
 
 .ui-datepicker-calendar td.selected-departure.arrival-unavailable.minimum-stay-requirement {
-    background-image: linear-gradient(to right bottom, #ADE79E 50%, #DDDDDD 50%);
+    background-image: linear-gradient(to right bottom, var(--preselected) 50%, var(--unavailable) 50%);
 }
