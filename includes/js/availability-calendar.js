@@ -329,6 +329,33 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     * Adds alert if readonly display field if clicked.
+     * @param {HTMLElement} calendar
+     */
+    function maybePreventClickOnDisplayFields(calendar) {
+        let key = 'Display';
+        let fields = [arrival + key, departure + key];
+        for (let i = 0; i < fields.length; i++) {
+            let input = getCalendarInputField(fields[i], calendar);
+            if (
+                (null !== input)
+                && ('readonly' === input.getAttribute('readonly'))
+            ) {
+                let title = input.getAttribute('title');
+                if (
+                    (null !== title)
+                    && ('' !== title)
+                ) {
+                    // noinspection JSUnresolvedFunction
+                    $(input).on('click', function () {
+                        alert(this.getAttribute('title'));
+                    })
+                }
+            }
+        }
+    }
+
+    /**
      * Returns calendar date format or default format string.
      *
      * @param {HTMLElement} calendar
@@ -1214,6 +1241,7 @@ jQuery(document).ready(function ($) {
                 };
                 // noinspection JSUnresolvedFunction
                 $(calendar).datepicker(parameters);
+                maybePreventClickOnDisplayFields(calendar);
                 break;
         }
         lateUpdateCalendarCellData(calendar);
