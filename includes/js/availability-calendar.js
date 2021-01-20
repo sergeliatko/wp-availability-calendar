@@ -836,7 +836,8 @@ jQuery(document).ready(function ($) {
         //HANDLE FLAGS AND CLASSES
         //BEFORE MIN DATE
         //check if the date is before min date
-        let beforeMinDate = (theDate < stringToDate(getCalendarParameter('firstDate', this), format));
+        let firstDate = stringToDate(getCalendarParameter('firstDate', this), format);
+        let beforeMinDate = (theDate < firstDate);
         //handle classes before min date
         if (beforeMinDate) {
             classes.push('before-min-date');
@@ -882,11 +883,14 @@ jQuery(document).ready(function ($) {
         classes.push(arrivalAvailable ? 'arrival-available' : 'arrival-unavailable');
         //check if departure is available
         //get yesterday date
-        let yesterdayData = getDateData(dateToString(dateAddDays(theDate, -1), format), dates);
+        let yesterdayDate = dateAddDays(theDate, -1);
+        let yesterdayDateString = dateToString(yesterdayDate, format);
+        let yesterdayData = getDateData(yesterdayDateString, dates);
         //if yesterday is available then departure is also available
         let departureAvailable = (
             isAvailable(yesterdayData)
             && !(beforeMinDate || afterMaxDate)
+            && !(yesterdayDate < firstDate)
         );
         //handle class
         classes.push(departureAvailable ? 'departure-available' : 'departure-unavailable');
