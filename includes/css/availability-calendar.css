@@ -1,6 +1,7 @@
 /* variables */
 .availability-calendar .ui-datepicker {
-    --default: #e8e8e8;
+    --border: #DDDDDD;
+    --default: #E8E8E8;
     --available: #FFFFFF;
     --unavailable: #E8E8E8;
     --preselected: #C1E2B9;
@@ -62,7 +63,7 @@
 
 .availability-calendar .ui-datepicker-calendar {
     border-collapse: collapse;
-    border: 1px solid #DDDDDD;
+    border: 1px solid var(--border);
     margin: 0 auto;
     width: auto;
 }
@@ -70,7 +71,7 @@
 .availability-calendar .ui-datepicker-calendar th,
 .availability-calendar .ui-datepicker-calendar td {
     box-sizing: border-box;
-    border: 1px solid #DDDDDD;
+    border: 1px solid var(--border);
     padding: 0.25em;
     height: 3em;
     width: 3em;
@@ -81,6 +82,7 @@
 }
 
 /* multiple calendars */
+/*noinspection DuplicatedCode*/
 .availability-calendar .ui-datepicker-multi {
     box-sizing: border-box;
     clear: both;
