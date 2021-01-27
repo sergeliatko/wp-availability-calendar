@@ -95,7 +95,7 @@
     clear: both;
     display: flex !important;
     flex-flow: row wrap;
-    justify-content: space-evenly;
+    justify-content: center;
     align-content: space-evenly;
     align-items: flex-start;
     max-width: 100%;
