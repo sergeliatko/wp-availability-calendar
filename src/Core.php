@@ -9,6 +9,7 @@ namespace SergeLiatko\WPAvailabilityCalendar;
  * @package SergeLiatko\WPAvailabilityCalendar
  */
 class Core {
+
 	use DateFormatTranslateTrait, HTMLTagTrait, IsEmptyTrait, ParseArgsRecursiveTrait, ScriptsTrait;
 
 	protected const DEFAULT_DATE_FORMAT     = 'Y-m-d';
@@ -191,6 +192,7 @@ class Core {
 			'departuresNotAllowed'    => 'Departures are not allowed.',
 			'rate'                    => 'Rates from {rate}/night.',
 			'minimumStay'             => 'Minimum stay is {minimumStay} night(s).',
+			'minimumStayConflict'     => 'Your departure cannot be prior to minimum stay requirement.',
 			'selectedArrival'         => 'Your selected arrival date.',
 			'selectedStay'            => 'Your selected stay.',
 			'selectedDeparture'       => 'Your selected departure date.',
