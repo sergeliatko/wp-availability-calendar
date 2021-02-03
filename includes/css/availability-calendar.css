@@ -162,7 +162,7 @@
 }
 
 .availability-calendar .ui-datepicker-calendar td.ui-datepicker-unselectable > .ui-state-default {
-    opacity: .45;
+    opacity: .65;
 }
 
 .availability-calendar .ui-datepicker-calendar td {

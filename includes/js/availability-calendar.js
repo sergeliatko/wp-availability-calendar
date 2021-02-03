@@ -837,6 +837,18 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     * Filters array to preserve unique values.
+     *
+     * @param {string} value
+     * @param {number} index
+     * @param {string[]} array
+     * @returns {boolean}
+     */
+    function unique(value, index, array) {
+        return array.indexOf(value) === index;
+    }
+
+    /**
      *
      * @param {Date} theDate
      * @returns {*[]}
@@ -972,7 +984,6 @@ jQuery(document).ready(function ($) {
         let canArrive = (arrivalAvailable && arrivalAllowed);
         let canDepart = (departureAvailable && departureAllowed);
         //STAY PERIOD
-        let conflictMessage = false;
         //SELECTED ARRIVAL
         let selectedArrivalDateString = readElementData('selected-arrival', this);
         let selectedArrivalDate = stringToDate(selectedArrivalDateString, format);
@@ -992,7 +1003,8 @@ jQuery(document).ready(function ($) {
             ) {
                 //evening conflict with rules or availability
                 classes.push('arrival-conflict');
-                conflictMessage = true;
+                // noinspection JSUnresolvedVariable
+                messages.push(availabilityCalendar.messages.selectedArrivalConflict);
             }
         }
         //SELECTED DEPARTURE
@@ -1014,14 +1026,16 @@ jQuery(document).ready(function ($) {
             ) {
                 //morning conflict with rules or availability
                 classes.push('departure-conflict');
-                conflictMessage = true;
+                // noinspection JSUnresolvedVariable
+                messages.push(availabilityCalendar.messages.selectedDepartureConflict);
             }
         }
-        //SELECTED STAY
+        //ARE DATES SELECTED?
         if (
             (null !== selectedArrivalDate)
             && (null !== selectedDepartureDate)
         ) {
+            //IS SELECTED STAY
             if ((selectedArrivalDate < theDate) && (theDate < selectedDepartureDate)) {
                 classes.push('selected-stay');
                 // noinspection JSUnresolvedVariable
@@ -1034,15 +1048,18 @@ jQuery(document).ready(function ($) {
                 ) {
                     //full day conflict
                     classes.push('stay-conflict');
-                    conflictMessage = true;
+                    // noinspection JSUnresolvedVariable
+                    messages.push(availabilityCalendar.messages.selectedStayConflict);
                 } else if (!arrivalAvailable) {
                     //evening conflict
                     classes.push('arrival-conflict');
-                    conflictMessage = true;
+                    // noinspection JSUnresolvedVariable
+                    messages.push(availabilityCalendar.messages.selectedArrivalConflict);
                 } else if (!departureAvailable) {
                     //morning conflict
                     classes.push('departure-conflict');
-                    conflictMessage = true;
+                    // noinspection JSUnresolvedVariable
+                    messages.push(availabilityCalendar.messages.selectedDepartureConflict);
                 }
             }
             let minimumStayUntilDate = stringToDate(
@@ -1051,29 +1068,20 @@ jQuery(document).ready(function ($) {
             );
             //are we in case where selected departure is before minimum stay
             if ((selectedDepartureDate < minimumStayUntilDate)) {
-                let minimumStayConflictMessage = false;
-                if (
-                    (theDate > selectedDepartureDate)
-                    && (theDate < minimumStayUntilDate)
-                ) {
-                    classes.push('stay-conflict');
-                    minimumStayConflictMessage = true;
-                } else if (areDatesEqual(theDate, minimumStayUntilDate)) {
-                    classes.push('departure-conflict');
-                    minimumStayConflictMessage = true;
-                } else if (areDatesEqual(theDate, selectedDepartureDate)) {
+                if (isSelectedArrival) {
                     classes.push('arrival-conflict');
-                    minimumStayConflictMessage = true;
-                }
-                if (true === minimumStayConflictMessage) {
+                    // noinspection JSUnresolvedVariable
+                    messages.push(availabilityCalendar.messages.minimumStayConflict);
+                } else if (isSelectedDeparture) {
+                    classes.push('departure-conflict');
+                    // noinspection JSUnresolvedVariable
+                    messages.push(availabilityCalendar.messages.minimumStayConflict);
+                } else if ((selectedArrivalDate < theDate) && (theDate < selectedDepartureDate)) {
+                    classes.push('stay-conflict');
                     // noinspection JSUnresolvedVariable
                     messages.push(availabilityCalendar.messages.minimumStayConflict);
                 }
             }
-        }
-        if (true === conflictMessage) {
-            // noinspection JSUnresolvedVariable
-            messages.push(availabilityCalendar.messages.selectedDatesConflict);
         }
         //MINIMUM STAY IN DEPARTURE STATE
         let minDepartureDateString = readElementData('first-departure', this);
@@ -1107,7 +1115,6 @@ jQuery(document).ready(function ($) {
                 messages.push(availabilityCalendar.messages.minimumStayPeriod);
             }
         }
-
         //END HANDLE FLAGS, CLASSES AND MESSAGES
 
         // noinspection JSUnusedAssignment
@@ -1131,7 +1138,12 @@ jQuery(document).ready(function ($) {
             );
         }
 
-        return [selectable, classes.join(' '), messages.join(' ')];
+        //unique classes
+        let uniqueClasses = classes.filter(unique);
+        //unique messages
+        let uniqueMessages = messages.filter(unique);
+
+        return [selectable, uniqueClasses.join(' '), uniqueMessages.join(' ')];
     }
 
     /**
