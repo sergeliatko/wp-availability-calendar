@@ -184,27 +184,35 @@ class Core {
 	 */
 	protected static function getDefaultMessages(): array {
 		return apply_filters( 'availability_calendar_default_messages', array(
-			'available'                 => 'Available.',
-			'unavailable'               => 'Booked.',
-			'arrivalsAllowed'           => 'Arrivals are allowed.',
-			'arrivalsNotAllowed'        => 'Arrivals are not allowed.',
-			'departuresAllowed'         => 'Departures are allowed.',
-			'departuresNotAllowed'      => 'Departures are not allowed.',
-			'rate'                      => 'Rates from {rate}/night.',
-			'minimumStay'               => 'Minimum stay is {minimumStay} night(s).',
-			'minimumStayConflict'       => 'Your departure cannot be prior to minimum stay requirement.',
-			'selectedArrival'           => 'Your selected arrival date.',
-			'selectedStay'              => 'Your selected stay.',
-			'selectedDeparture'         => 'Your selected departure date.',
-			'selectedDatesConflict'     => 'This date availability conflicts with your selected dates.',
-			'selectedArrivalConflict'   => 'Arrival is not possible on this date.',
-			'selectedDepartureConflict' => 'Departure is not possible on this date.',
-			'selectedStayConflict'      => 'Stay date conflicts with rules or availability.',
-			'minimumStayPeriod'         => 'Minimum stay.',
-			'firstAvailableDeparture'   => 'First available departure.',
-			'unknownError'              => 'An error occurred. Please retry or contact us for assistance.',
-			'selectAnotherDate'         => 'Please select another date or call us for assistance.',
-			'arrivalImpossible'         => 'Sorry, minimum stay requirement does not allow to arrive on this date.',
+			'available'                  => 'Available.',
+			'unavailable'                => 'Booked.',
+			'arrivalsAllowed'            => 'Arrivals are allowed.',
+			'arrivalsNotAllowed'         => 'Arrivals are not allowed.',
+			'departuresAllowed'          => 'Departures are allowed.',
+			'departuresNotAllowed'       => 'Departures are not allowed.',
+			'rate'                       => 'Rates from {rate}/night.',
+			'minimumStay'                => 'Minimum stay is {minimumStay} night(s).',
+			'minimumStayConflict'        => 'Your departure cannot be prior to minimum stay requirement.',
+			'selectedArrival'            => 'Your selected arrival date.',
+			'selectedStay'               => 'Your selected stay.',
+			'selectedDeparture'          => 'Your selected departure date.',
+			'selectedDatesConflict'      => 'This date availability conflicts with your selected dates.',
+			'selectedArrivalConflict'    => 'Arrival is not possible on this date.',
+			'selectedDepartureConflict'  => 'Departure is not possible on this date.',
+			'selectedStayConflict'       => 'Stay date conflicts with rules or availability.',
+			'minimumStayPeriod'          => 'Minimum stay.',
+			'firstAvailableDeparture'    => 'First available departure.',
+			'selectAnotherDate'          => 'Please select another date or call us for assistance.',
+			'arrivalImpossible'          => 'Sorry, minimum stay requirement does not allow to arrive on this date.',
+			'selectArrivalDate'          => 'Please select you arrival date.',
+			'modifyArrivalDate'          => 'If necessary, modify your arrival date.',
+			'confirmDepartureDate'       => 'Please confirm your departure date.',
+			'help'                       => 'Help',
+			'alertNoArrivals'            => 'Arrivals are not allowed on this day.',
+			'alertNoDepartures'          => 'Departures are not allowed on this day.',
+			'legendNoArrivalsDepartures' => 'Date is available, but arrivals/departures are not allowed on this day.',
+			'legendConflict'             => 'Selected date is unavailable or conflicts with booking rules (minimum stay/allowed arrivals or departures).',
+			'unknownError'               => 'An error occurred. Please retry or contact us for assistance.',
 		) );
 	}
 
@@ -456,7 +464,7 @@ class Core {
 	 *
 	 * @return string
 	 */
-	protected function toHtmlId( array $items = array() ) {
+	protected function toHtmlId( array $items = array() ): string {
 		$base = sprintf( '%1$s-%2$d', $this->getName(), $this->getInstanceNumber() );
 
 		return empty( $items ) ? $base : join( '-', array_merge( array( $base ), $items ) );
