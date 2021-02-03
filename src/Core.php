@@ -212,6 +212,7 @@ class Core {
 			'alertNoDepartures'          => 'Departures are not allowed on this day.',
 			'legendNoArrivalsDepartures' => 'Date is available, but arrivals/departures are not allowed on this day.',
 			'legendConflict'             => 'Selected date is unavailable or conflicts with booking rules (minimum stay/allowed arrivals or departures).',
+			'legendHelp'                 => 'Right click (or long press on touch screens) on a date to show details.',
 			'unknownError'               => 'An error occurred. Please retry or contact us for assistance.',
 		) );
 	}
