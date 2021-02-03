@@ -976,11 +976,11 @@ jQuery(document).ready(function ($) {
         //SELECTED ARRIVAL
         let selectedArrivalDateString = readElementData('selected-arrival', this);
         let selectedArrivalDate = stringToDate(selectedArrivalDateString, format);
-        let selectedArrival = (
+        let isSelectedArrival = (
             (null !== selectedArrivalDate)
             && areDatesEqual(theDate, selectedArrivalDate)
         );
-        if (selectedArrival) {
+        if (isSelectedArrival) {
             classes.push('selected-arrival');
             // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.selectedArrival);
@@ -998,11 +998,11 @@ jQuery(document).ready(function ($) {
         //SELECTED DEPARTURE
         let selectedDepartureDateString = readElementData('selected-departure', this);
         let selectedDepartureDate = stringToDate(selectedDepartureDateString, format);
-        let selectedDeparture = (
+        let isSelectedDeparture = (
             (null !== selectedDepartureDate)
             && areDatesEqual(theDate, selectedDepartureDate)
         );
-        if (selectedDeparture) {
+        if (isSelectedDeparture) {
             classes.push('selected-departure');
             // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.selectedDeparture);
@@ -1049,6 +1049,7 @@ jQuery(document).ready(function ($) {
                 getMinimumStayUntilDateString(selectedArrivalDateString, this),
                 format
             );
+            //are we in case where selected departure is before minimum stay
             if ((selectedDepartureDate < minimumStayUntilDate)) {
                 let minimumStayConflictMessage = false;
                 if (
