@@ -33,6 +33,11 @@ class Core {
 	protected static $messages;
 
 	/**
+	 * @var string $help_html
+	 */
+	protected static $help_html;
+
+	/**
 	 * @var int $instance_number
 	 */
 	protected $instance_number;
@@ -127,7 +132,79 @@ class Core {
 	public function __toString(): string {
 		self::maybeEnqueueScripts();
 
-		return $this->toHTML();
+		return HTMLContainer::HTML(
+			$this->getContainerHtmlAttributes(),
+			HTMLContainer::HTML( array( 'class' => 'availability-calendar-messages' ) ) .
+			$this->toHTML() .
+			self::getHelpHtml()
+		);
+	}
+
+	/**
+	 * @return string
+	 */
+	protected static function getHelpHtml(): string {
+		if ( empty( self::$help_html ) ) {
+			$items = array(
+				'available'   => self::getMessage( 'available' ),
+				'not-allowed' => self::getMessage( 'legendNoArrivalsDepartures' ),
+				'unavailable' => self::getMessage( 'unavailable' ),
+				'preselected' => self::getMessage( 'minimumStayPeriod' ),
+				'selected'    => self::getMessage( 'selectedStay' ),
+				'conflict'    => self::getMessage( 'legendConflict' ),
+				'help'        => self::getMessage( 'legendHelp' ),
+			);
+			array_walk( $items, function ( &$content, $class ) {
+				$content_prefix = ( 'help' === $class ) ? '' : HTMLContainer::HTML(
+					array(
+						'class' => 'legend-icon legend-icon-' . $class,
+					),
+					rand( 1, 31 ),
+					'span'
+				);
+				$content        = HTMLContainer::HTML(
+					array(
+						'class' => 'legend-item legend-item-' . $class,
+					),
+					join( ' ', array_filter( array( $content_prefix, $content ) ) ),
+					'p'
+				);
+			} );
+			$html = HTMLContainer::HTML(
+				array(
+					'class' => 'availability-calendar-help',
+				),
+				HTMLContainer::HTML(
+					array(
+						'class' => 'help-button-wrapper',
+					),
+					HTMLContainer::HTML(
+						array(
+							'class' => 'help-button',
+						),
+						self::getMessage( 'help' ),
+						'span'
+					),
+					'p'
+				) .
+				HTMLContainer::HTML(
+					array(
+						'class' => 'help-inner',
+					),
+					join( '', $items )
+				)
+			);
+			self::setHelpHtml( $html );
+		}
+
+		return self::$help_html;
+	}
+
+	/**
+	 * @param string $help_html
+	 */
+	protected static function setHelpHtml( string $help_html ) {
+		self::$help_html = $help_html;
 	}
 
 	/**
@@ -177,6 +254,17 @@ class Core {
 	 */
 	protected static function setMessages( array $messages ): void {
 		self::$messages = $messages;
+	}
+
+	/**
+	 * @param string $message
+	 *
+	 * @return string
+	 */
+	protected static function getMessage( string $message ): string {
+		$messages = self::getMessages();
+
+		return empty( $messages[ $message ] ) ? '' : $messages[ $message ];
 	}
 
 	/**
@@ -324,8 +412,9 @@ class Core {
 				'lastDate'  => $this->getLastDate(),
 			), $this->getParameters() ),
 			array(
-				'html_attrs'    => 'html_attrs',
-				'srcDateFormat' => 'srcDateFormat',
+				'html_attrs'           => 'html_attrs',
+				'container_html_attrs' => 'container_html_attrs',
+				'srcDateFormat'        => 'srcDateFormat',
 			)
 		);
 	}
@@ -334,12 +423,29 @@ class Core {
 	 * @return array
 	 */
 	protected function getHtmlAttributes(): array {
-		$data = array_intersect_key(
-			$this->getParameters(),
-			array( 'html_attrs' => 'html_attrs' )
-		);
+		return is_array( $html_attrs = $this->getCalendarParameter( 'html_attrs' ) ) ?
+			$html_attrs
+			: array();
+	}
 
-		return array_pop( $data );
+	/**
+	 * @return array
+	 */
+	protected function getContainerHtmlAttributes(): array {
+		return is_array( $html_attrs = $this->getCalendarParameter( 'container_html_attrs' ) ) ?
+			$html_attrs
+			: array();
+	}
+
+	/**
+	 * @param string $parameter
+	 *
+	 * @return mixed|null
+	 */
+	protected function getCalendarParameter( string $parameter ) {
+		$parameters = $this->getParameters();
+
+		return isset( $parameters[ $parameter ] ) ? $parameters[ $parameter ] : null;
 	}
 
 
@@ -348,27 +454,31 @@ class Core {
 	 */
 	protected function getDefaultParameters(): array {
 		$defaults = array(
-			'html_attrs'         => array(
+			'html_attrs'           => array(
 				'id'            => $this->getCalendarHtmlId(),
 				'class'         => $this->getName(),
 				//do not overwrite this attribute, unless you know what you're doing
 				'data-instance' => $this->getInstanceNumber(),
 			),
-			'arrivalId'          => $this->getArrivalHtmlId(),
-			'arrivalDisplayId'   => $this->getArrivalDisplayHtmlId(),
-			'srcDateFormat'      => self::DEFAULT_DATE_FORMAT,
-			'dateFormat'         => self::PHPDateFormatToJSDatePicker( self::DEFAULT_DATE_FORMAT ),
-			'dateFormatDisplay'  => self::PHPDateFormatToJSDatePicker(
+			'container_html_attrs' => array(
+				'id'    => $this->getCalendarHtmlId() . '-wrapper',
+				'class' => $this->getName() . '-wrapper',
+			),
+			'arrivalId'            => $this->getArrivalHtmlId(),
+			'arrivalDisplayId'     => $this->getArrivalDisplayHtmlId(),
+			'srcDateFormat'        => self::DEFAULT_DATE_FORMAT,
+			'dateFormat'           => self::PHPDateFormatToJSDatePicker( self::DEFAULT_DATE_FORMAT ),
+			'dateFormatDisplay'    => self::PHPDateFormatToJSDatePicker(
 				get_option( 'date_format', self::DEFAULT_DATE_FORMAT )
 			),
-			'departureId'        => $this->getDepartureHtmlId(),
-			'departureDisplayId' => $this->getDepartureDisplayHtmlId(),
-			'maxStay'            => self::DEFAULT_MAX_STAY,
-			'minStay'            => self::DEFAULT_MIN_STAY,
-			'daysInAdvance'      => self::DEFAULT_DAYS_IN_ADVANCE,
-			'bookingWindow'      => self::DEFAULT_BOOKING_WINDOW,
-			'showRates'          => false,
-			'weekStart'          => absint( get_option( 'start_of_week', 0 ) ),
+			'departureId'          => $this->getDepartureHtmlId(),
+			'departureDisplayId'   => $this->getDepartureDisplayHtmlId(),
+			'maxStay'              => self::DEFAULT_MAX_STAY,
+			'minStay'              => self::DEFAULT_MIN_STAY,
+			'daysInAdvance'        => self::DEFAULT_DAYS_IN_ADVANCE,
+			'bookingWindow'        => self::DEFAULT_BOOKING_WINDOW,
+			'showRates'            => false,
+			'weekStart'            => absint( get_option( 'start_of_week', 0 ) ),
 		);
 
 		/**

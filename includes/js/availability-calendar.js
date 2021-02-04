@@ -1287,4 +1287,11 @@ jQuery(document).ready(function ($) {
 
     // noinspection JSUnresolvedFunction
     $('.availability-calendar').each(initiateCalendar);
+
+    //handle help button click
+    // noinspection JSUnresolvedFunction
+    $('.availability-calendar-help .help-button').on('click', function () {
+        // noinspection JSUnresolvedFunction
+        $(this.parentNode.parentNode).toggleClass('state-open');
+    });
 });

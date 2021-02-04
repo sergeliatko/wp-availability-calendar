@@ -1,5 +1,5 @@
 /* variables */
-.availability-calendar .ui-datepicker {
+.availability-calendar-wrapper {
     --border: #DDDDDD;
     --color: #212121;
     --default: #E8E8E8;
@@ -271,4 +271,106 @@
 
 .availability-calendar .ui-datepicker-calendar td.selected-departure.arrival-unavailable.minimum-stay-requirement {
     background-image: linear-gradient(to right bottom, var(--preselected) 50%, var(--unavailable) 50%);
+}
+
+/* CALENDAR LEGEND */
+.availability-calendar-help {
+    font-size: 14px;
+    font-weight: lighter;
+    margin: 1.5em auto 0.5em;
+}
+
+.availability-calendar-help.state-open {
+    margin-bottom: 1.5em;
+}
+
+.availability-calendar-help .help-inner {
+    display: none;
+}
+
+.availability-calendar-help.state-open .help-inner {
+    border: 1px solid var(--border);
+    display: block;
+    padding: 0.5em 0.75em;
+}
+
+.availability-calendar-help p.help-button-wrapper {
+    margin-bottom: 0;
+    text-align: right;
+}
+
+.availability-calendar-help.state-open p.help-button-wrapper {
+    margin-bottom: 1em;
+}
+
+.availability-calendar-help .help-button {
+    cursor: pointer;
+}
+
+.availability-calendar-help .help-button:before {
+    border-top: 0.25em solid transparent;
+    border-bottom: 0.25em solid transparent;
+    border-right: 0.25em solid;
+    display: inline-block;
+    content: "";
+    margin-right: 0.5em;
+    position: relative;
+    top: -0.125em;
+    height: 0;
+    width: 0;
+    opacity: 0.35;
+    vertical-align: middle;
+}
+
+.availability-calendar-help.state-open .help-button:before {
+    border-left: 0.25em solid transparent;
+    border-right: 0.25em solid transparent;
+    border-top: 0.25em solid;
+    margin-right: 0.25em;
+    top: 0;
+    opacity: 0.85;
+}
+
+.availability-calendar-help p.legend-item {
+    margin-bottom: 5px;
+}
+
+.availability-calendar-help .legend-icon {
+    border: 1px solid var(--border);
+    color: var(--color);
+    display: inline-block;
+    margin-right: 0.5em;
+    height: 1.75em;
+    width: 2.25em;
+    text-align: center;
+}
+
+.availability-calendar-help .legend-icon-available,
+.availability-calendar-help .legend-icon-not-allowed {
+    background-color: var(--available);
+}
+
+.availability-calendar[data-state="arrival"] td.arrival-available.arrival-prohibited .ui-state-default:before,
+.availability-calendar[data-state="departure"] td.departure-available.departure-prohibited .ui-state-default:before,
+.availability-calendar-help .legend-icon-not-allowed:before {
+    content: "*";
+    font-size: 0.65em;
+    color: var(--conflict);
+    vertical-align: super;
+}
+
+.availability-calendar-help .legend-icon-unavailable {
+    background-color: var(--unavailable);
+}
+
+.availability-calendar-help .legend-icon-preselected {
+    background-color: var(--preselected);
+}
+
+.availability-calendar-help .legend-icon-selected {
+    background-color: var(--selected);
+}
+
+.availability-calendar-help .legend-icon-conflict {
+    background-color: var(--conflict);
 }
