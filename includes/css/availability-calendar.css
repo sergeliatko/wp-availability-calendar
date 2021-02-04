@@ -15,7 +15,7 @@
     box-sizing: border-box;
     clear: both;
     display: block;
-    margin: 0 auto 16px;
+    margin: 1.5em auto;
 }
 
 .availability-calendar .ui-datepicker-header {
@@ -117,6 +117,12 @@
 }
 
 /* typography */
+
+.availability-calendar-messages p {
+    font-size: 1.125em;
+    margin-bottom: 0.5em;
+    text-align: center;
+}
 
 .availability-calendar .ui-datepicker-header {
     font-size: 16px;

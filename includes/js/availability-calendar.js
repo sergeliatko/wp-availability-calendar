@@ -437,6 +437,45 @@ jQuery(document).ready(function ($) {
         state = ('undefined' === typeof state) ? arrival : state;
         writeElementData('state', state, calendar);
         highlightInputFields(state, calendar);
+        //maybe display calendar prompt message
+        displayCalendarPrompt(calendar, state);
+
+    }
+
+    /**
+     *
+     * @param {HTMLElement} calendar
+     * @param {string} state
+     */
+    function displayCalendarPrompt(calendar, state) {
+        let type = getCalendarType(calendar);
+        if (type === active) {
+            if (state === departure) {
+                // noinspection JSUnresolvedVariable
+                writeCalendarPrompt(calendar, availabilityCalendar.messages.confirmDepartureDate);
+            } else {
+                // noinspection JSUnresolvedVariable
+                let message = ('' === readElementData('selected-arrival', calendar)) ?
+                    availabilityCalendar.messages.selectArrivalDate
+                    : availabilityCalendar.messages.modifyArrivalDate;
+                writeCalendarPrompt(calendar, message);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param {HTMLElement} calendar
+     * @param {string} message
+     */
+    function writeCalendarPrompt(calendar, message) {
+        let messagesContainer = $(calendar.parentNode).find('.availability-calendar-messages').get(0);
+        if (undefined !== messagesContainer) {
+            $(messagesContainer).empty();
+            let messageContainer = document.createElement('p');
+            messageContainer.append(document.createTextNode(message));
+            messagesContainer.append(messageContainer);
+        }
     }
 
     /**
