@@ -863,6 +863,21 @@ jQuery(document).ready(function ($) {
                 console.log(e);
             }
         });
+        //handle available date click when arrival / departure is not allowed
+        if (active === getCalendarType(calendar)) {
+            let currentState = getCalendarState(calendar);
+            let selector = (arrival === currentState) ?
+                'td.arrival-available.arrival-prohibited'
+                : 'td.departure-available.departure-prohibited';
+            // noinspection JSUnresolvedVariable
+            let message = (arrival === currentState) ?
+                availabilityCalendar.messages.alertNoArrivals
+                : availabilityCalendar.messages.alertNoDepartures;
+            // noinspection JSUnresolvedFunction
+            $(calendar).find(selector).on('click', function () {
+                alert(message);
+            });
+        }
     }
 
     /**
