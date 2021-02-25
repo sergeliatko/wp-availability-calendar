@@ -156,14 +156,38 @@ class Core {
 				'prompt'      => self::getMessage( 'legendPrompt' ),
 			);
 			array_walk( $items, function ( &$content, $class ) {
-				$content_prefix = ( 'help' === $class ) ? '' : HTMLContainer::HTML(
-					array(
-						'class' => 'legend-icon legend-icon-' . $class,
-					),
-					rand( 1, 31 ),
-					'span'
-				);
-				$content        = HTMLContainer::HTML(
+				switch ( $class ) {
+					case 'help':
+						$content_prefix = HTMLContainer::HTML(
+							array( 'class' => 'dashicons dashicons-info-outline' ),
+							'',
+							'span'
+						);
+						break;
+					case 'prompt':
+						$content_prefix = HTMLContainer::HTML(
+							array( 'class' => 'dashicons dashicons-phone' ),
+							'',
+							'span'
+						);
+						break;
+					case 'available':
+					case 'not-allowed':
+					case 'unavailable':
+					case 'preselected':
+					case 'selected':
+					case 'conflict':
+					default:
+						$content_prefix = HTMLContainer::HTML(
+							array(
+								'class' => 'legend-icon legend-icon-' . $class,
+							),
+							rand( 1, 31 ),
+							'span'
+						);
+						break;
+				}
+				$content = HTMLContainer::HTML(
 					array(
 						'class' => 'legend-item legend-item-' . $class,
 					),
