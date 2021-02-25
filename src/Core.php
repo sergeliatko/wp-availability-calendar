@@ -153,6 +153,7 @@ class Core {
 				'selected'    => self::getMessage( 'selectedStay' ),
 				'conflict'    => self::getMessage( 'legendConflict' ),
 				'help'        => self::getMessage( 'legendHelp' ),
+				'prompt'      => self::getMessage( 'legendPrompt' ),
 			);
 			array_walk( $items, function ( &$content, $class ) {
 				$content_prefix = ( 'help' === $class ) ? '' : HTMLContainer::HTML(
@@ -301,6 +302,7 @@ class Core {
 			'legendNoArrivalsDepartures' => 'Date is available, but arrivals/departures are not allowed on this day.',
 			'legendConflict'             => 'Selected date is unavailable or conflicts with booking rules (minimum stay/allowed arrivals or departures).',
 			'legendHelp'                 => 'Right click (or long press on touch screens) on a date to show details.',
+			'legendPrompt'               => 'Feel free to contact us if you need assistance with availability or booking rules.',
 			'unknownError'               => 'An error occurred. Please retry or contact us for assistance.',
 		) );
 	}
