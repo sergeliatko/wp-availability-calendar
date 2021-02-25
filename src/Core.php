@@ -95,7 +95,7 @@ class Core {
 					self::maybeMinify( self::pathToUrl(
 						dirname( __FILE__, 2 ) . '/includes/css/availability-calendar.css'
 					) ),
-					array(),
+					array( 'dashicons' ),
 					null,
 					'all',
 				),

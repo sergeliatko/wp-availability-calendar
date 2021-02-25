@@ -341,6 +341,11 @@
     margin-bottom: 5px;
 }
 
+.availability-calendar-help .legend-item .dashicons {
+    vertical-align: middle;
+    opacity: 0.75;
+}
+
 .availability-calendar-help .legend-icon {
     border: 1px solid var(--border);
     color: var(--color);
