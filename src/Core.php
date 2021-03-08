@@ -207,7 +207,7 @@ class Core {
 						array(
 							'class' => 'help-button',
 						),
-						self::getMessage( 'help' ),
+						'<span class="dashicons dashicons-info-outline"></span>' . self::getMessage( 'help' ),
 						'span'
 					),
 					'p'
