@@ -1,6 +1,7 @@
 /* variables */
 .availability-calendar-wrapper {
     --border: #DDDDDD;
+    --header: #DDDDDD;
     --color: #212121;
     --default: #E8E8E8;
     --available: #FFFFFF;
@@ -19,21 +20,29 @@
     margin: 1.5em auto;
 }
 
+.availability-calendar .ui-datepicker-inline {
+    max-width: 318px;
+    margin: 0 auto;
+}
+
 .availability-calendar .ui-datepicker-header {
+    border: 1px solid var(--border);
+    border-bottom-width: 0;
+    background-color: var(--header);
     position: relative;
-    padding-bottom: 0.75em;
+    padding: 0.625em 1.125em;
 }
 
 .availability-calendar .ui-datepicker-prev {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 0.625em;
+    left: 0.25em;
 }
 
 .availability-calendar .ui-datepicker-next {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 0.625em;
+    right: 0.25em;
 }
 
 .availability-calendar .ui-datepicker .ui-icon {
@@ -87,12 +96,13 @@
 }
 
 .availability-calendar .ui-datepicker-calendar th {
+    background-color: var(--header);
     height: 2em;
 }
 
 /* multiple calendars */
 /*noinspection DuplicatedCode*/
-.availability-calendar .ui-datepicker-multi {
+.availability-calendar .ui-datepicker-inline.ui-datepicker-multi {
     box-sizing: border-box;
     clear: both;
     display: flex !important;
@@ -126,7 +136,7 @@
 
 .availability-calendar .ui-datepicker-calendar th,
 .availability-calendar .ui-datepicker-calendar td {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: lighter;
     line-height: 1.25;
     text-align: center;
@@ -147,7 +157,7 @@
 
 .availability-calendar .ui-datepicker-calendar .rate {
     display: block;
-    font-size: 0.675em;
+    font-size: 0.6125em;
     opacity: 0.65;
     white-space: nowrap;
 }
@@ -369,8 +379,9 @@
 }
 
 .availability-calendar-help .legend-item .dashicons {
-    vertical-align: middle;
+    margin: 0 0.65em 0 0.25em;
     opacity: 0.75;
+    vertical-align: middle;
 }
 
 .availability-calendar-help .legend-icon {

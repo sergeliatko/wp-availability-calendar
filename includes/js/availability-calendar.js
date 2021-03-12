@@ -1294,7 +1294,7 @@ jQuery(document).ready(function ($) {
      * @returns {number}
      */
     function fitCalendars(calendar) {
-        return Math.floor(calendar.offsetWidth / 295);
+        return Math.max(1, Math.floor(calendar.offsetWidth / 317.2));
     }
 
     /**
