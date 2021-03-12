@@ -291,14 +291,14 @@
 }
 
 .availability-calendar-help .help-button .dashicons {
-    font-size: 1em;
-    height: 1em;
-    width: 1em;
+    font-size: 1.125em;
+    height: 1.125em;
+    width: 1.125em;
     vertical-align: middle;
     position: relative;
     top: -1px;
     margin-right: 5px;
-    opacity: 0.65;
+    opacity: .85;
 }
 
 .availability-calendar-help.state-open .help-button .dashicons {

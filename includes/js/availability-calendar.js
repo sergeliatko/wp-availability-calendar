@@ -473,8 +473,17 @@ jQuery(document).ready(function ($) {
         if (undefined !== messagesContainer) {
             $(messagesContainer).empty();
             let messageContainer = document.createElement('p');
+            messageContainer.className = 'prompt-highlight';
             messageContainer.append(document.createTextNode(message));
             messagesContainer.append(messageContainer);
+            window.setTimeout(function (element) {
+                $(element).style('border-width', '0');
+                window.setTimeout(function (element) {
+                    // noinspection JSUnresolvedFunction
+                    $(element).removeClass('prompt-highlight');
+                    element.removeAttribute('style');
+                }, 1000, element);
+            }, 1500, messageContainer);
         }
     }
 
