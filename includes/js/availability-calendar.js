@@ -477,7 +477,8 @@ jQuery(document).ready(function ($) {
             messageContainer.append(document.createTextNode(message));
             messagesContainer.append(messageContainer);
             window.setTimeout(function (element) {
-                $(element).style('border-width', '0');
+                // noinspection JSUnresolvedFunction
+                $(element).css('border-width', '0');
                 window.setTimeout(function (element) {
                     // noinspection JSUnresolvedFunction
                     $(element).removeClass('prompt-highlight');
