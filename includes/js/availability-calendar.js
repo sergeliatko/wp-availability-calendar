@@ -439,7 +439,6 @@ jQuery(document).ready(function ($) {
         highlightInputFields(state, calendar);
         //maybe display calendar prompt message
         displayCalendarPrompt(calendar, state);
-
     }
 
     /**
@@ -499,6 +498,15 @@ jQuery(document).ready(function ($) {
         //update calendar state
         let newState = (arrival === state) ? departure : arrival;
         setCalendarState(calendar, newState);
+        if (departure === newState) {
+            let firstDeparture = $('td.date-key-' + readElementData('first-departure', calendar));
+            if (0 === firstDeparture.length) {
+                // noinspection JSUnresolvedFunction
+                let stepMonths = (1 === $(calendar).datepicker('option', 'numberOfMonths')) ? 1 : 0;
+                // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+                $.datepicker._adjustInstDate($.datepicker._getInst(calendar), stepMonths, 'M');
+            }
+        }
         //update calendar cells
         lateUpdateCalendarCellData(calendar);
     }
