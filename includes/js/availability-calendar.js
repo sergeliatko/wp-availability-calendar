@@ -36,6 +36,8 @@ jQuery(document).ready(function ($) {
      */
     const departure = 'departure';
 
+    let resizeTimer = null;
+
     /**
      * Checks if provided parameter is a number and bigger than zero.
      *
@@ -1358,13 +1360,28 @@ jQuery(document).ready(function ($) {
         lateUpdateCalendarCellData(calendar);
     }
 
-    // noinspection JSUnresolvedFunction
-    $('.availability-calendar').each(initiateCalendar);
-
     //handle help button click
     // noinspection JSUnresolvedFunction
     $('.availability-calendar-help .help-button').on('click', function () {
         // noinspection JSUnresolvedFunction
         $(this.parentNode.parentNode).toggleClass('state-open');
+    });
+
+    // noinspection JSUnresolvedFunction
+    $('.availability-calendar').each(initiateCalendar);
+
+    // noinspection JSUnresolvedFunction
+    $(window).on('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            // noinspection JSUnresolvedFunction
+            $('.availability-calendar').each(function (order, calendar) {
+                // noinspection JSUnresolvedFunction
+                $(calendar).datepicker('option', 'numberOfMonths', fitCalendars(calendar));
+                // noinspection JSUnresolvedFunction
+                $(calendar).datepicker('refresh');
+                lateUpdateCalendarCellData(calendar);
+            });
+        }, 250);
     });
 });
