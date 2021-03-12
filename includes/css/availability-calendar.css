@@ -8,6 +8,7 @@
     --preselected: #C1E2B9;
     --selected: #6AB044;
     --conflict: #F06A6A;
+    --highlight: #FF8C00;
 }
 
 /* structure */
@@ -280,6 +281,11 @@
 }
 
 /* CALENDAR LEGEND */
+.availability-calendar-messages .prompt-highlight {
+    border: 3px solid var(--highlight);
+    transition: border-width 0.5s linear;
+}
+
 .availability-calendar-help {
     font-size: 14px;
     font-weight: lighter;
