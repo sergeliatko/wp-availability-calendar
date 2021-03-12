@@ -505,6 +505,7 @@ jQuery(document).ready(function ($) {
                 let stepMonths = (1 === $(calendar).datepicker('option', 'numberOfMonths')) ? 1 : 0;
                 // noinspection JSUnresolvedVariable,JSUnresolvedFunction
                 $.datepicker._adjustInstDate($.datepicker._getInst(calendar), stepMonths, 'M');
+                return;
             }
         }
         //update calendar cells
