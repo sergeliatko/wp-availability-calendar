@@ -38,6 +38,11 @@ class Core {
 	protected static $help_html;
 
 	/**
+	 * @var string $clear_html
+	 */
+	protected static $clear_html;
+
+	/**
 	 * @var int $instance_number
 	 */
 	protected $instance_number;
@@ -136,6 +141,7 @@ class Core {
 			$this->getContainerHtmlAttributes(),
 			HTMLContainer::HTML( array( 'class' => 'availability-calendar-messages' ) ) .
 			$this->toHTML() .
+			self::getClearHtml() .
 			self::getHelpHtml()
 		);
 	}
@@ -241,6 +247,37 @@ class Core {
 	}
 
 	/**
+	 * @return string
+	 */
+	protected static function getClearHtml(): string {
+		if ( self::isEmpty( self::$clear_html ) ) {
+			$clear_html = HTMLContainer::HTML(
+				array(
+					'class' => 'availability-calendar-clear',
+				),
+				HTMLContainer::HTML(
+					array(
+						'class' => 'clear-button',
+					),
+					'<span class="dashicons dashicons-no-alt"></span>' . self::getMessage( 'clear' ),
+					'span'
+				),
+				'p'
+			);
+			self::setClearHtml( $clear_html );
+		}
+
+		return self::$clear_html;
+	}
+
+	/**
+	 * @param string $clear_html
+	 */
+	protected static function setClearHtml( string $clear_html ): void {
+		self::$clear_html = $clear_html;
+	}
+
+	/**
 	 * @param array $instance
 	 *
 	 * @return $this
@@ -328,6 +365,7 @@ class Core {
 			'selectArrivalDate'          => 'Please select you arrival date.',
 			'modifyArrivalDate'          => 'If needed, modify your arrival date.',
 			'confirmDepartureDate'       => 'Please confirm your departure date.',
+			'clear'                      => 'Clear dates',
 			'help'                       => 'Help',
 			'alertNoArrivals'            => 'Sorry, arrivals are not allowed on this day.',
 			'alertNoDepartures'          => 'Sorry, departures are not allowed on this day.',

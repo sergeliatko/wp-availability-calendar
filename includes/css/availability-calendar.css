@@ -302,16 +302,27 @@
     padding: 0.375em;
 }
 
+.availability-calendar-clear,
 .availability-calendar-help {
     font-size: 14px;
     font-weight: lighter;
-    margin: 1.5em auto 0.5em;
+    margin: 1em auto 0.5em;
+}
+
+.availability-calendar-clear {
+    text-align: center;
+}
+
+.availability-calendar-clear .clear-button:hover,
+.availability-calendar-clear .clear-button:focus {
+    color: var(--conflict);
 }
 
 .availability-calendar-help.state-open {
     margin-bottom: 1.5em;
 }
 
+.availability-calendar-clear .clear-button .dashicons,
 .availability-calendar-help .help-button .dashicons {
     font-size: 1.125em;
     height: 1.125em;
@@ -346,6 +357,7 @@
     margin-bottom: 1em;
 }
 
+.availability-calendar-clear .clear-button,
 .availability-calendar-help .help-button {
     cursor: pointer;
 }

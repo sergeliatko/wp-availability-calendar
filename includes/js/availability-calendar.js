@@ -1300,6 +1300,42 @@ jQuery(document).ready(function ($) {
     }
 
     /**
+     * Clears calendar dates.
+     *
+     * @param {HTMLDivElement} calendar
+     */
+    function clearDates(calendar) {
+        // noinspection JSUnresolvedFunction,JSUnresolvedVariable
+        let instance = $.datepicker._getInst(calendar);
+        // noinspection JSUnresolvedFunction,JSUnresolvedVariable
+        let date = $.datepicker.parseDate('yy-m-d', instance.drawYear + '-' + (1 + instance.drawMonth) + '-' + instance.currentDay);
+        let fields = [arrival, departure];
+        for (let f in fields) {
+            // noinspection JSUnresolvedVariable,JSUnfilteredForInLoop
+            updateCalendarFields(
+                '',
+                fields[f],
+                calendar,
+                instance.settings.dateFormat,
+                instance.settings.altFormat
+            );
+        }
+        let attributes = ['selected-arrival', 'selected-departure', 'first-departure', 'last-departure'];
+        for (let a in attributes) {
+            // noinspection JSUnfilteredForInLoop
+            removeElementData(attributes[a], calendar);
+        }
+        setCalendarState(calendar, arrival);
+        // noinspection JSUnresolvedFunction
+        $(calendar).datepicker('setDate', null);
+        // noinspection JSUnresolvedFunction
+        $(calendar).datepicker('refresh');
+        // noinspection JSUnresolvedFunction
+        $(calendar).datepicker('setDate', date);
+        lateUpdateCalendarCellData(calendar);
+    }
+
+    /**
      * @param {number} order
      * @param {HTMLElement} calendar
      */
@@ -1359,6 +1395,20 @@ jQuery(document).ready(function ($) {
         }
         lateUpdateCalendarCellData(calendar);
     }
+
+    //handle clear dates button click
+    // noinspection JSUnresolvedFunction
+    $('.availability-calendar-clear .clear-button').on('click', function () {
+        try {
+            let calendar = $($(this).closest('.availability-calendar-wrapper')[0]).find('.availability-calendar.hasDatepicker')[0];
+            if (undefined === calendar) {
+                return;
+            }
+            clearDates(calendar);
+        } catch (e) {
+            console.log(e);
+        }
+    });
 
     //handle help button click
     // noinspection JSUnresolvedFunction
