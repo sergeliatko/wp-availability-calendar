@@ -62,7 +62,7 @@ trait ScriptsTrait {
 	 * @return bool
 	 */
 	protected static function isScriptsEnqueued(): bool {
-		return (bool) self::$scripts_enqueued;
+		return !empty( self::$scripts_enqueued );
 	}
 
 	/**
@@ -113,12 +113,12 @@ trait ScriptsTrait {
 	 * @return string
 	 * @noinspection PhpUnused
 	 */
-	protected static function maybeMinify( $url ) {
+	protected static function maybeMinify( $url ): string {
 		$min = self::min();
 
 		return empty( $min ) ?
 			$url
-			: preg_replace( '/(?<!\.min)(\.js|\.css)/', "{$min}$1", $url );
+			: preg_replace( '/(?<!\.min)(\.js|\.css)/', "$min$1", $url );
 	}
 
 	/**
@@ -126,7 +126,7 @@ trait ScriptsTrait {
 	 *
 	 * @return string
 	 */
-	protected static function min() {
+	protected static function min(): string {
 		return ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
 	}
 

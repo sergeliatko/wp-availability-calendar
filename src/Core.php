@@ -12,15 +12,16 @@ class Core {
 
 	use DateFormatTranslateTrait, HTMLTagTrait, IsEmptyTrait, ParseArgsRecursiveTrait, ScriptsTrait;
 
-	protected const DEFAULT_DATE_FORMAT     = 'Y-m-d';
-	protected const NAME                    = 'availability-calendar';
-	protected const SCRIPTS_HANDLE          = 'availability-calendar';
-	protected const DEFAULT_DAYS_IN_ADVANCE = 0;
-	protected const DEFAULT_BOOKING_WINDOW  = 365;
-	protected const DEFAULT_MIN_STAY        = 1;
-	protected const DEFAULT_MAX_STAY        = 180;
-	protected const DEFAULT_SHOW_RATES      = false;
-	protected const XHTML                   = false;
+	protected const DEFAULT_DATE_FORMAT            = 'Y-m-d';
+	protected const NAME                           = 'availability-calendar';
+	protected const SCRIPTS_HANDLE                 = 'availability-calendar';
+	protected const DEFAULT_DAYS_IN_ADVANCE        = 0;
+	protected const DEFAULT_BOOKING_WINDOW         = 365;
+	protected const DEFAULT_MIN_STAY               = 1;
+	protected const DEFAULT_MAX_STAY               = 180;
+	protected const DEFAULT_SHOW_RATES             = false;
+	protected const DEFAULT_HIDE_UNAVAILABLE_RATES = false;
+	protected const XHTML                          = false;
 
 	/**
 	 * @var array|array[] $instances
@@ -383,15 +384,16 @@ class Core {
 	 */
 	protected static function getGlobalDefaults(): array {
 		return apply_filters( 'availability_calendar_global_defaults', array(
-			'dateFormat'        => self::PHPDateFormatToJSDatePicker( self::DEFAULT_DATE_FORMAT ),
-			'dateFormatDisplay' => self::PHPDateFormatToJSDatePicker(
+			'dateFormat'           => self::PHPDateFormatToJSDatePicker( self::DEFAULT_DATE_FORMAT ),
+			'dateFormatDisplay'    => self::PHPDateFormatToJSDatePicker(
 				get_option( 'date_format', self::DEFAULT_DATE_FORMAT )
 			),
-			'maxStay'           => self::DEFAULT_MAX_STAY,
-			'minStay'           => self::DEFAULT_MIN_STAY,
-			'bookingWindow'     => self::DEFAULT_BOOKING_WINDOW,
-			'daysInAdvance'     => self::DEFAULT_DAYS_IN_ADVANCE,
-			'showRates'         => self::DEFAULT_SHOW_RATES,
+			'maxStay'              => self::DEFAULT_MAX_STAY,
+			'minStay'              => self::DEFAULT_MIN_STAY,
+			'bookingWindow'        => self::DEFAULT_BOOKING_WINDOW,
+			'daysInAdvance'        => self::DEFAULT_DAYS_IN_ADVANCE,
+			'showRates'            => self::DEFAULT_SHOW_RATES,
+			'hideUnavailableRates' => self::DEFAULT_HIDE_UNAVAILABLE_RATES,
 		) );
 	}
 
@@ -518,7 +520,7 @@ class Core {
 	protected function getCalendarParameter( string $parameter ) {
 		$parameters = $this->getParameters();
 
-		return isset( $parameters[ $parameter ] ) ? $parameters[ $parameter ] : null;
+		return $parameters[ $parameter ] ?? null;
 	}
 
 
@@ -550,7 +552,8 @@ class Core {
 			'minStay'              => self::DEFAULT_MIN_STAY,
 			'daysInAdvance'        => self::DEFAULT_DAYS_IN_ADVANCE,
 			'bookingWindow'        => self::DEFAULT_BOOKING_WINDOW,
-			'showRates'            => false,
+			'showRates'            => self::DEFAULT_SHOW_RATES,
+			'hideUnavailableRates' => self::DEFAULT_HIDE_UNAVAILABLE_RATES,
 			'weekStart'            => absint( get_option( 'start_of_week', 0 ) ),
 		);
 

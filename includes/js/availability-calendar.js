@@ -1,4 +1,5 @@
 /* global availabilityCalendar, jQuery */
+// noinspection JSUnusedGlobalSymbols
 jQuery(document).ready(function ($) {
 
     /**
@@ -298,7 +299,7 @@ jQuery(document).ready(function ($) {
      *
      * @param {string} field
      * @param {HTMLElement} calendar
-     * @returns {HTMLElement|null}
+     * @returns {HTMLInputElement|null}
      */
     function getCalendarInputField(field, calendar) {
         let id = getCalendarParameter(field + 'Id', calendar);
@@ -851,26 +852,36 @@ jQuery(document).ready(function ($) {
         if (true === getCalendarParameter('showRates', calendar)) {
             let format = getCalendarDateFormat(calendar);
             let dates = getCalendarAvailability(calendar);
+            let hideUnavailableRates = getCalendarParameter('hideUnavailableRates', calendar);
             // noinspection JSUnresolvedFunction
             $(calendar).find(
                 '.ui-datepicker-calendar td.has-rate[class*="date-key-"] > *[class*="ui-state"]'
             ).each(function () {
                 //extract date from css class
                 let date = extractDateFromCSSClasses(this.parentNode.className, format);
-                //initiate rate
-                let rate = '';
                 //extract rate data and check all conditions
                 if (
-                    (undefined !== date)
+                    (0 === $(this.parentNode).find('.rate').length)
+                    && (undefined !== date)
                     && hasDateData(date, dates)
-                    && ('' !== (rate = getRate(getDateData(date, dates))))
-                    && (0 === $(this.parentNode).find('.rate').length)
                 ) {
-                    //append rate element to cell
-                    let rateElement = document.createElement('span');
-                    rateElement.className = 'rate';
-                    rateElement.appendChild(document.createTextNode(rate));
-                    this.parentNode.appendChild(rateElement);
+                    //extract date data
+                    let dateData = getDateData(date, dates);
+                    // get rate
+                    let rate = getRate(dateData);
+                    // get availability
+                    let available = isAvailable(dateData);
+                    if ('' !== rate) {
+                        // add rate only if available or not hide unavailable rates option set
+                        if (available || (false === hideUnavailableRates)) {
+                            //append rate element to cell
+                            let rateElement = document.createElement('span');
+                            rateElement.className = 'rate';
+                            rateElement.appendChild(document.createTextNode(rate));
+                            this.parentNode.appendChild(rateElement);
+                        }
+                    }
+
                 }
             });
         }
@@ -975,6 +986,8 @@ jQuery(document).ready(function ($) {
          */
         let dateData = getDateData(theDateString, dates);
         //RATE
+        // hide unavailable date rates?
+        let hideUnavailableRates = getCalendarParameter('hideUnavailableRates', this);
         //set the rate string
         let rate = getRate(dateData);
         //check if we have rates
@@ -1023,7 +1036,7 @@ jQuery(document).ready(function ($) {
             && !afterMaxDate
         ) {
             //handle rate message
-            if (hasRate) {
+            if (hasRate && (isAvailable(dateData) || (false === hideUnavailableRates))) {
                 // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.rate.replace('{rate}', rate));
             }
@@ -1349,7 +1362,6 @@ jQuery(document).ready(function ($) {
         let defaultDate = ((null === arrivalInput) || ('' === arrivalInput.value)) ? null : arrivalInput.value;
         //grab calendar parameters
         let calendarParameters = getCalendarParameters(calendar);
-        // noinspection JSUnresolvedVariable
         let parameters = {
             //handle days display
             beforeShowDay: beforeShowDay,
