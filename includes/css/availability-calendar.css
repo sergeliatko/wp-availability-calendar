@@ -90,7 +90,7 @@
 .availability-calendar .ui-datepicker-calendar td {
     box-sizing: border-box;
     border: 1px solid var(--border);
-    padding: 0.25em;
+    padding: 0.125em;
     height: 3em;
     width: 3em;
 }
@@ -137,7 +137,7 @@
 .availability-calendar .ui-datepicker-calendar th,
 .availability-calendar .ui-datepicker-calendar td {
     font-size: 15px;
-    font-weight: lighter;
+    font-weight: normal;
     line-height: 1.25;
     text-align: center;
     vertical-align: middle;
@@ -158,8 +158,28 @@
 .availability-calendar .ui-datepicker-calendar .rate {
     display: block;
     font-size: 0.6125em;
-    opacity: 0.65;
+    font-weight: normal;
+    opacity: 0.85;
     white-space: nowrap;
+}
+
+.availability-calendar .ui-datepicker-calendar .rate.old-rate {
+    font-size: 0.5em;
+    font-weight: lighter;
+    opacity: 0.65;
+    position: relative;
+}
+
+.availability-calendar .ui-datepicker-calendar .rate.old-rate:after {
+    border-bottom: 1px solid;
+    content: "";
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 17.5%;
+    width: 65%;
+    height: 0;
+    opacity: 0.175;
 }
 
 /* defaults */

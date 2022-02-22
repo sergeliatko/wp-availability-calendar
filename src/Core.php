@@ -350,6 +350,7 @@ class Core {
 			'departuresAllowed'          => 'Departures are allowed.',
 			'departuresNotAllowed'       => 'Departures are not allowed.',
 			'rate'                       => 'Rates from {rate}/night.',
+			'oldRate'                    => 'Previously from {oldRate}/night.',
 			'minimumStay'                => 'Minimum stay is {minimumStay} night(s).',
 			'minimumStayConflict'        => 'Your departure cannot be prior to minimum stay requirement.',
 			'selectedArrival'            => 'Your selected arrival date.',

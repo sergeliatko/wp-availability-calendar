@@ -31,11 +31,6 @@ class Availability implements AvailabilityInterface {
 	public $departure;
 
 	/**
-	 * @var string $rate
-	 */
-	public $rate;
-
-	/**
 	 * @var int $minStay
 	 */
 	public $minStay;
@@ -46,52 +41,45 @@ class Availability implements AvailabilityInterface {
 	public $maxStay;
 
 	/**
+	 * @var string $rate
+	 */
+	public $rate;
+
+	/**
+	 * @var string $oldRate
+	 */
+	public $oldRate;
+
+	/**
 	 * Availability constructor.
 	 *
 	 * @param string $date
 	 * @param bool   $available
 	 * @param bool   $arrival
 	 * @param bool   $departure
-	 * @param string $rate
 	 * @param int    $minStay
 	 * @param int    $maxStay
+	 * @param string $rate
+	 * @param string $oldRate
 	 */
 	public function __construct(
 		string $date,
-		bool $available,
-		bool $arrival,
-		bool $departure,
+		bool   $available,
+		bool   $arrival,
+		bool   $departure,
+		int    $minStay,
+		int    $maxStay,
 		string $rate,
-		int $minStay,
-		int $maxStay
+		string $oldRate = ''
 	) {
 		$this->setDate( $date );
 		$this->setAvailable( $available );
 		$this->setArrival( $arrival );
 		$this->setDeparture( $departure );
-		$this->setRate( $rate );
 		$this->setMinStay( $minStay );
 		$this->setMaxStay( $maxStay );
-	}
-
-	/**
-	 * @param array $parameters
-	 *
-	 * @return \SergeLiatko\WPAvailabilityCalendar\Availability
-	 */
-	public static function __fromArray( array $parameters ): Availability {
-		/**
-		 * @var string $date
-		 * @var bool   $available
-		 * @var bool   $arrival
-		 * @var bool   $departure
-		 * @var string $rate
-		 * @var int    $minStay
-		 * @var int    $maxStay
-		 */
-		extract( $parameters, EXTR_OVERWRITE );
-
-		return new self( $date, $available, $arrival, $departure, $rate, $minStay, $maxStay );
+		$this->setRate( $rate );
+		$this->setOldRate( $oldRate );
 	}
 
 	/**
@@ -170,25 +158,6 @@ class Availability implements AvailabilityInterface {
 	}
 
 	/**
-	 * @return string
-	 * @noinspection PhpUnused
-	 */
-	public function getRate(): string {
-		return $this->rate;
-	}
-
-	/**
-	 * @param string $rate
-	 *
-	 * @return Availability
-	 */
-	public function setRate( string $rate ): Availability {
-		$this->rate = $rate;
-
-		return $this;
-	}
-
-	/**
 	 * @return int
 	 * @noinspection PhpUnused
 	 */
@@ -222,6 +191,43 @@ class Availability implements AvailabilityInterface {
 	 */
 	public function setMaxStay( int $maxStay ): Availability {
 		$this->maxStay = $maxStay;
+
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 * @noinspection PhpUnused
+	 */
+	public function getRate(): string {
+		return $this->rate;
+	}
+
+	/**
+	 * @param string $rate
+	 *
+	 * @return Availability
+	 */
+	public function setRate( string $rate ): Availability {
+		$this->rate = $rate;
+
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getOldRate(): string {
+		return $this->oldRate;
+	}
+
+	/**
+	 * @param string $oldRate
+	 *
+	 * @return Availability
+	 */
+	public function setOldRate( string $oldRate ): Availability {
+		$this->oldRate = $oldRate;
 
 		return $this;
 	}

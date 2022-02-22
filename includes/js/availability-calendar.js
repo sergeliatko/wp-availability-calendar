@@ -166,7 +166,7 @@ jQuery(document).ready(function ($) {
             || ('function' !== typeof date1.getTime)
             || ('function' !== typeof date2.getTime)
         ) {
-            //no function getTime() in at least one of the dates
+            // no function getTime() in at least one of the dates
             return false;
         }
         return date1.getTime() === date2.getTime();
@@ -199,7 +199,7 @@ jQuery(document).ready(function ($) {
      * @returns {boolean}
      */
     function isDateStringBeforeOrEqual(date, before, format) {
-        //compare same dates as strings
+        // compare same dates as strings
         if (date === before) {
             return true;
         }
@@ -440,7 +440,7 @@ jQuery(document).ready(function ($) {
         state = ('undefined' === typeof state) ? arrival : state;
         writeElementData('state', state, calendar);
         highlightInputFields(state, calendar);
-        //maybe display calendar prompt message
+        // maybe display calendar prompt message
         displayCalendarPrompt(calendar, state);
     }
 
@@ -496,9 +496,9 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function switchCalendarState(calendar) {
-        //get current calendar state
+        // get current calendar state
         let state = getCalendarState(calendar);
-        //update calendar state
+        // update calendar state
         let newState = (arrival === state) ? departure : arrival;
         setCalendarState(calendar, newState);
         if (departure === newState) {
@@ -511,7 +511,7 @@ jQuery(document).ready(function ($) {
                 return;
             }
         }
-        //update calendar cells
+        // update calendar cells
         lateUpdateCalendarCellData(calendar);
     }
 
@@ -561,6 +561,17 @@ jQuery(document).ready(function ($) {
     function getRate(dateData) {
         let rate = getObjectProperty('rate', dateData, 'string');
         return (undefined === rate) ? '' : rate;
+    }
+
+    /**
+     * Extracts old rate as string from date data.
+     *
+     * @param {object} dateData
+     * @returns {string}
+     */
+    function getOldRate(dateData) {
+        let oldRate = getObjectProperty('oldRate', dateData, 'string');
+        return (undefined === oldRate) ? '' : oldRate;
     }
 
     /**
@@ -658,15 +669,15 @@ jQuery(document).ready(function ($) {
         // noinspection JSUnresolvedVariable
         return (
             dates.hasOwnProperty(dateString)
-            //make sure it is a number
+            // make sure it is a number
             && ('number' === typeof dates[dateString].maxStay)
-            //make sure it is bigger than zero
+            // make sure it is bigger than zero
             && (0 < dates[dateString].maxStay)
         ) ? dates[dateString].maxStay
             : ((
-                //make sure default is a number
+                // make sure default is a number
                 ('number' === typeof defaultMaxStay)
-                //and it is bigger than zero
+                // and it is bigger than zero
                 && (0 < defaultMaxStay)
             ) ? defaultMaxStay : availabilityCalendar.defaults.maxStay);
     }
@@ -678,7 +689,7 @@ jQuery(document).ready(function ($) {
      * @returns {string}
      */
     function getMinimumStayUntilDateString(arrivalDateString, calendar) {
-        //get format to use
+        // get format to use
         let format = getCalendarDateFormat(calendar);
         return dateToString(
             dateAddDays(
@@ -696,27 +707,27 @@ jQuery(document).ready(function ($) {
      * @returns {string}
      */
     function getMustDepartOnDateString(arrivalDateString, calendar) {
-        //get dates object
+        // get dates object
         let dates = getCalendarAvailability(calendar);
-        //if arrival is not available return it back as first conflict
+        // if arrival is not available return it back as first conflict
         // noinspection JSUnresolvedVariable
         if (!isDateAvailable(arrivalDateString, dates)) {
             return arrivalDateString;
         }
-        //get format to use
+        // get format to use
         let format = getCalendarDateFormat(calendar);
-        //start by converting arrival to Date
+        // start by converting arrival to Date
         let arrivalDate = stringToDate(arrivalDateString, format);
         let addDays = 1;
         let newDate = '';
-        //get max stay limit for this date in this calendar
+        // get max stay limit for this date in this calendar
         let maxStay = getMaxStay(arrivalDateString, calendar);
         while (isDateAvailable(newDate = dateToString(dateAddDays(arrivalDate, addDays), format), dates)) {
-            //if addDays >= maxStay - return newDate now
+            // if addDays >= maxStay - return newDate now
             if (addDays >= maxStay) {
                 return newDate;
             }
-            //add another day and restart the loop
+            // add another day and restart the loop
             addDays++;
         }
         return newDate;
@@ -733,9 +744,9 @@ jQuery(document).ready(function ($) {
         if (isDateAllowedForDepartures(startDateString, dates)) {
             return startDateString;
         }
-        //get calendar last date
+        // get calendar last date
         let lastDate = getCalendarParameter('lastDate', calendar);
-        //get format to use
+        // get format to use
         let format = getCalendarDateFormat(calendar);
         let addDays = 1;
         let newDate = dateToString(
@@ -748,7 +759,7 @@ jQuery(document).ready(function ($) {
             !isDateAllowedForDepartures(newDate, dates)
             && isDateStringBeforeOrEqual(newDate, lastDate, format)
             ) {
-            //add another day and restart the loop
+            // add another day and restart the loop
             addDays++;
             newDate = dateToString(
                 dateAddDays(
@@ -795,15 +806,15 @@ jQuery(document).ready(function ($) {
      * @param {string} displayFormat
      */
     function updateCalendarFields(newDate, fieldType, calendar, format, displayFormat) {
-        //update calendar selected date data
+        // update calendar selected date data
         writeElementData('selected-' + fieldType, newDate, calendar);
-        //get working input field
+        // get working input field
         let inputField = getCalendarInputField(fieldType, calendar);
         inputField.value = newDate;
-        //update calendar display input if present
+        // update calendar display input if present
         let displayInputField = getCalendarInputField(fieldType + 'Display', calendar);
         if (null !== displayInputField) {
-            //update display input field with maybe converted new date
+            // update display input field with maybe converted new date
             displayInputField.value = ('' === newDate) ?
                 newDate
                 : convertDate(
@@ -848,7 +859,7 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function updateCalendarCellData(calendar) {
-        //handle show rates
+        // handle show rates
         if (true === getCalendarParameter('showRates', calendar)) {
             let format = getCalendarDateFormat(calendar);
             let dates = getCalendarAvailability(calendar);
@@ -857,15 +868,15 @@ jQuery(document).ready(function ($) {
             $(calendar).find(
                 '.ui-datepicker-calendar td.has-rate[class*="date-key-"] > *[class*="ui-state"]'
             ).each(function () {
-                //extract date from css class
+                // extract date from css class
                 let date = extractDateFromCSSClasses(this.parentNode.className, format);
-                //extract rate data and check all conditions
+                // extract rate data and check all conditions
                 if (
                     (0 === $(this.parentNode).find('.rate').length)
                     && (undefined !== date)
                     && hasDateData(date, dates)
                 ) {
-                    //extract date data
+                    // extract date data
                     let dateData = getDateData(date, dates);
                     // get rate
                     let rate = getRate(dateData);
@@ -874,18 +885,29 @@ jQuery(document).ready(function ($) {
                     if ('' !== rate) {
                         // add rate only if available or not hide unavailable rates option set
                         if (available || (false === hideUnavailableRates)) {
-                            //append rate element to cell
+                            // get old rate
+                            let oldRate = getOldRate(dateData);
+                            // set hasOldsRate flag
+                            let hasOldRate = ('' !== oldRate);
+                            // append rate element to cell
                             let rateElement = document.createElement('span');
-                            rateElement.className = 'rate';
+                            rateElement.className = hasOldRate ? 'rate new-rate' : 'rate';
                             rateElement.appendChild(document.createTextNode(rate));
                             this.parentNode.appendChild(rateElement);
+                            // append old rate element to cell
+                            if (hasOldRate) {
+                                let oldRateElement = document.createElement('span');
+                                oldRateElement.className = 'rate old-rate';
+                                oldRateElement.appendChild(document.createTextNode(oldRate));
+                                this.parentNode.appendChild(oldRateElement);
+                            }
                         }
                     }
 
                 }
             });
         }
-        //handle context menu call
+        // handle context menu call
         // noinspection JSUnresolvedFunction
         $(calendar).find('.ui-datepicker-calendar td[title]').contextmenu(function (event) {
             event.preventDefault();
@@ -895,7 +917,7 @@ jQuery(document).ready(function ($) {
                 console.log(e);
             }
         });
-        //handle available date click when arrival / departure is not allowed
+        // handle available date click when arrival / departure is not allowed
         if (active === getCalendarType(calendar)) {
             let currentState = getCalendarState(calendar);
             let selector = (arrival === currentState) ?
@@ -940,44 +962,44 @@ jQuery(document).ready(function ($) {
      * @returns {*[]}
      */
     function beforeShowDay(theDate) {
-        //initiate classes and messages
+        // initiate classes and messages
         let classes = [];
         let messages = [];
 
-        //GET DATA
-        //get calendar current state
+        // GET DATA
+        // get calendar current state
         let state = getCalendarState(this);
-        //get calendar date format
+        // get calendar date format
         let format = getCalendarParameter('dateFormat', this);
-        //get dates
+        // get dates
         let dates = getCalendarAvailability(this);
-        //get current date as string to use as key in dates
+        // get current date as string to use as key in dates
         let theDateString = dateToString(theDate, format);
 
-        //store current date key in css class
+        // store current date key in css class
         let theDateKey = dateToString(theDate, dateKeyFormat);
         classes.push('date-key-' + theDateKey);
 
-        //HANDLE FLAGS AND CLASSES
-        //BEFORE MIN DATE
-        //check if the date is before min date
+        // HANDLE FLAGS AND CLASSES
+        // BEFORE MIN DATE
+        // check if the date is before min date
         let firstDate = stringToDate(getCalendarParameter('firstDate', this), format);
         let beforeMinDate = (theDate < firstDate);
-        //handle classes before min date
+        // handle classes before min date
         if (beforeMinDate) {
             classes.push('before-min-date');
         }
-        //AFTER MAX DATE
-        //check if the date is after max date
+        // AFTER MAX DATE
+        // check if the date is after max date
         let afterMaxDate = (theDate > stringToDate(getCalendarParameter('lastDate', this), format));
-        //handle class after max date
+        // handle class after max date
         if (afterMaxDate) {
             classes.push('after-max-date');
         }
-        //DATA
-        //check if we have data for the current date
+        // DATA
+        // check if we have data for the current date
         let hasData = hasDateData(theDateString, dates);
-        //handle data class
+        // handle data class
         classes.push(hasData ? 'has-data' : 'no-data');
         /**
          * Current date data object.
@@ -985,82 +1007,93 @@ jQuery(document).ready(function ($) {
          * @type {object}
          */
         let dateData = getDateData(theDateString, dates);
-        //RATE
+        // RATE
         // hide unavailable date rates?
         let hideUnavailableRates = getCalendarParameter('hideUnavailableRates', this);
-        //set the rate string
+        // set the rate string
         let rate = getRate(dateData);
-        //check if we have rates
+        // check if we have rates
         let hasRate = ('' !== rate);
+        // set the old rate string
+        let oldRate = getOldRate(dateData);
+        // check if we have old rates
+        let hasOldRate = ('' !== oldRate);
         if (
             !beforeMinDate
             && !afterMaxDate
         ) {
-            //handle rate class
+            // handle rate class
             classes.push(hasRate ? 'has-rate' : 'no-rate');
+            // handle old rate class
+            classes.push(hasOldRate ? 'has-old-rate' : 'no-old-rate');
         }
-        //AVAILABILITIES
-        //check if arrival is available
+        // AVAILABILITIES
+        // check if arrival is available
         // noinspection JSUnresolvedVariable
         let arrivalAvailable = (
             isAvailable(dateData)
             && !(beforeMinDate || afterMaxDate)
         );
-        //handle class
+        // handle class
         classes.push(arrivalAvailable ? 'arrival-available' : 'arrival-unavailable');
-        //check if departure is available
-        //get yesterday date
+        // check if departure is available
+        // get yesterday date
         let yesterdayDate = dateAddDays(theDate, -1);
         let yesterdayDateString = dateToString(yesterdayDate, format);
         let yesterdayData = getDateData(yesterdayDateString, dates);
-        //if yesterday is available then departure is also available
+        // if yesterday is available then departure is also available
         let departureAvailable = (
             isAvailable(yesterdayData)
             && !(beforeMinDate || afterMaxDate)
             && !(yesterdayDate < firstDate)
         );
-        //handle class
+        // handle class
         classes.push(departureAvailable ? 'departure-available' : 'departure-unavailable');
-        //ALLOWANCES
-        //check if arrivals are allowed
+        // ALLOWANCES
+        // check if arrivals are allowed
         let arrivalAllowed = isArrivalAllowed(dateData);
-        //handle class
+        // handle class
         classes.push(arrivalAllowed ? 'arrival-allowed' : 'arrival-prohibited');
-        //check if departures are allowed
+        // check if departures are allowed
         let departureAllowed = isDepartureAllowed(dateData);
-        //handle class
+        // handle class
         classes.push(departureAllowed ? 'departure-allowed' : 'departure-prohibited');
-        //handle basic messages
+        // handle basic messages
         if (
             !beforeMinDate
             && !afterMaxDate
         ) {
-            //handle rate message
+            // handle rates messages
             if (hasRate && (isAvailable(dateData) || (false === hideUnavailableRates))) {
                 // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.rate.replace('{rate}', rate));
+                // handle old rates messages
+                if (hasOldRate) {
+                    // noinspection JSUnresolvedVariable
+                    messages.push(availabilityCalendar.messages.oldRate.replace('{oldRate}', oldRate));
+                }
             }
-            //handle minimum stay message
+            // handle minimum stay message
             // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.minimumStay.replace(
                 '{minimumStay}',
                 getMinStay(theDateString, this)
             ));
-            //handle availability message
+            // handle availability message
             // noinspection JSUnresolvedVariable
             messages.push(
                 arrivalAvailable ?
                     availabilityCalendar.messages.available
                     : availabilityCalendar.messages.unavailable
             );
-            //handle arrival allowance messages
+            // handle arrival allowance messages
             // noinspection JSUnresolvedVariable
             messages.push(
                 arrivalAllowed ?
                     availabilityCalendar.messages.arrivalsAllowed
                     : availabilityCalendar.messages.arrivalsNotAllowed
             );
-            //handle departure allowance messages
+            // handle departure allowance messages
             // noinspection JSUnresolvedVariable
             messages.push(
                 departureAllowed ?
@@ -1068,11 +1101,11 @@ jQuery(document).ready(function ($) {
                     : availabilityCalendar.messages.departuresNotAllowed
             );
         }
-        //ARRIVAL / DEPARTURE POSSIBILITIES
+        // ARRIVAL / DEPARTURE POSSIBILITIES
         let canArrive = (arrivalAvailable && arrivalAllowed);
         let canDepart = (departureAvailable && departureAllowed);
-        //STAY PERIOD
-        //SELECTED ARRIVAL
+        // STAY PERIOD
+        // SELECTED ARRIVAL
         let selectedArrivalDateString = readElementData('selected-arrival', this);
         let selectedArrivalDate = stringToDate(selectedArrivalDateString, format);
         let isSelectedArrival = (
@@ -1083,19 +1116,19 @@ jQuery(document).ready(function ($) {
             classes.push('selected-arrival');
             // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.selectedArrival);
-            //handle case when unable to arrive
+            // handle case when unable to arrive
             if (
                 !canArrive
                 || beforeMinDate
                 || afterMaxDate
             ) {
-                //evening conflict with rules or availability
+                // evening conflict with rules or availability
                 classes.push('arrival-conflict');
                 // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.selectedArrivalConflict);
             }
         }
-        //SELECTED DEPARTURE
+        // SELECTED DEPARTURE
         let selectedDepartureDateString = readElementData('selected-departure', this);
         let selectedDepartureDate = stringToDate(selectedDepartureDateString, format);
         let isSelectedDeparture = (
@@ -1106,45 +1139,45 @@ jQuery(document).ready(function ($) {
             classes.push('selected-departure');
             // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.selectedDeparture);
-            //handle case when departure is not possible
+            // handle case when departure is not possible
             if (
                 !canDepart
                 || beforeMinDate
                 || afterMaxDate
             ) {
-                //morning conflict with rules or availability
+                // morning conflict with rules or availability
                 classes.push('departure-conflict');
                 // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.selectedDepartureConflict);
             }
         }
-        //ARE DATES SELECTED?
+        // ARE DATES SELECTED?
         if (
             (null !== selectedArrivalDate)
             && (null !== selectedDepartureDate)
         ) {
-            //IS SELECTED STAY
+            // IS SELECTED STAY
             if ((selectedArrivalDate < theDate) && (theDate < selectedDepartureDate)) {
                 classes.push('selected-stay');
                 // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.selectedStay);
-                //handle cases with conflict
+                // handle cases with conflict
                 if (
                     (!arrivalAvailable && !departureAvailable)
                     || beforeMinDate
                     || afterMaxDate
                 ) {
-                    //full day conflict
+                    // full day conflict
                     classes.push('stay-conflict');
                     // noinspection JSUnresolvedVariable
                     messages.push(availabilityCalendar.messages.selectedStayConflict);
                 } else if (!arrivalAvailable) {
-                    //evening conflict
+                    // evening conflict
                     classes.push('arrival-conflict');
                     // noinspection JSUnresolvedVariable
                     messages.push(availabilityCalendar.messages.selectedArrivalConflict);
                 } else if (!departureAvailable) {
-                    //morning conflict
+                    // morning conflict
                     classes.push('departure-conflict');
                     // noinspection JSUnresolvedVariable
                     messages.push(availabilityCalendar.messages.selectedDepartureConflict);
@@ -1154,7 +1187,7 @@ jQuery(document).ready(function ($) {
                 getMinimumStayUntilDateString(selectedArrivalDateString, this),
                 format
             );
-            //are we in case where selected departure is before minimum stay
+            // are we in case where selected departure is before minimum stay
             if ((selectedDepartureDate < minimumStayUntilDate)) {
                 if (isSelectedArrival) {
                     classes.push('arrival-conflict');
@@ -1171,7 +1204,7 @@ jQuery(document).ready(function ($) {
                 }
             }
         }
-        //MINIMUM STAY IN DEPARTURE STATE
+        // MINIMUM STAY IN DEPARTURE STATE
         let minDepartureDateString = readElementData('first-departure', this);
         let minStayMessage = false;
         if (
@@ -1182,7 +1215,7 @@ jQuery(document).ready(function ($) {
                 ('' !== selectedArrivalDateString)
                 && (theDateString === selectedArrivalDateString)
             ) {
-                //the selected arrival date is in minimum stay requirement
+                // the selected arrival date is in minimum stay requirement
                 classes.push('minimum-stay-requirement');
                 minStayMessage = true;
             } else if (
@@ -1190,7 +1223,7 @@ jQuery(document).ready(function ($) {
                 && (isDateStringBefore(selectedArrivalDateString, theDateString, format))
                 && (isDateStringBefore(theDateString, minDepartureDateString, format))
             ) {
-                //the date is in the minimum stay requirement period
+                // the date is in the minimum stay requirement period
                 classes.push('minimum-stay-requirement selected-stay');
                 minStayMessage = true;
             } else if (theDateString === minDepartureDateString) {
@@ -1203,18 +1236,18 @@ jQuery(document).ready(function ($) {
                 messages.push(availabilityCalendar.messages.minimumStayPeriod);
             }
         }
-        //END HANDLE FLAGS, CLASSES AND MESSAGES
+        // END HANDLE FLAGS, CLASSES AND MESSAGES
 
         // noinspection JSUnusedAssignment
         let selectable = false;
 
-        //HANDLE RETURN STATEMENTS
+        // HANDLE RETURN STATEMENTS
         if (arrival === state) {
-            //calendar is waiting for arrival date to be inserted
+            // calendar is waiting for arrival date to be inserted
             selectable = canArrive;
         } else {
-            //calendar is waiting for departure date to be inserted
-            //reject departure dates if cannot depart or date in not in range
+            // calendar is waiting for departure date to be inserted
+            // reject departure dates if user cannot depart or date in not in range
             selectable = (
                 canDepart
                 && isDateStringInRange(
@@ -1226,9 +1259,9 @@ jQuery(document).ready(function ($) {
             );
         }
 
-        //unique classes
+        // unique classes
         let uniqueClasses = classes.filter(unique);
-        //unique messages
+        // unique messages
         let uniqueMessages = messages.filter(unique);
 
         return [selectable, uniqueClasses.join(' '), uniqueMessages.join(' ')];
@@ -1241,28 +1274,28 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function onSelect(dateString, instance, calendar) {
-        //get current calendar state
+        // get current calendar state
         let state = getCalendarState(calendar);
-        //handle possible departure date before switching state to departure
-        //(or it risks to lock the calendar)
+        // handle possible departure date before switching state to departure
+        //(or it risks locking the calendar)
         if (arrival === state) {
-            //initiate messages
+            // initiate messages
             let messages = [];
-            //get format
+            // get format
             let mustDepartOnDateString = getMustDepartOnDateString(dateString, calendar);
             let minimumStayUntilDateString = getMinimumStayUntilDateString(dateString, calendar);
             let firstAllowedDepartureDateString = getFirstAllowedDepartureDateString(
                 minimumStayUntilDateString,
                 calendar
             );
-            //alert guest if they cannot arrive on this date as because they will have to leave before they are allowed to
+            // alert guest if they cannot arrive at this date as because they will have to leave before they are allowed to
             // noinspection JSUnresolvedVariable
             if (isDateStringBefore(
                 mustDepartOnDateString,
                 firstAllowedDepartureDateString,
                 instance.settings.dateFormat
             )) {
-                //minimum stay requirement is not met - alert guest and return
+                // minimum stay requirement is not met - alert guest and return
                 // noinspection JSUnresolvedVariable
                 messages.push(availabilityCalendar.messages.arrivalImpossible);
                 // noinspection JSUnresolvedVariable
@@ -1271,8 +1304,8 @@ jQuery(document).ready(function ($) {
                 lateUpdateCalendarCellData(calendar);
                 return;
             }
-            //departure calendar will not be locked at this point as it has at least one selectable departure
-            //clear departure fields
+            // departure calendar will not be locked at this point as it has at least one selectable departure
+            // clear departure fields
             // noinspection JSUnresolvedVariable
             updateCalendarFields(
                 '',
@@ -1281,16 +1314,16 @@ jQuery(document).ready(function ($) {
                 instance.settings.dateFormat,
                 instance.settings.altFormat
             );
-            //store first and last departure dates in calendar itself to limit the selectable range
+            // store first and last departure dates in calendar itself to limit the selectable range
             writeElementData('first-departure', firstAllowedDepartureDateString, calendar);
             writeElementData('last-departure', mustDepartOnDateString, calendar);
         }
-        //calendar got selected departure date - clear first and last departure dates data to remove limits
+        // calendar got selected departure date - clear first and last departure dates data to remove limits
         else if (departure === state) {
             removeElementData('first-departure', calendar);
             removeElementData('last-departure', calendar);
         }
-        //update calendar input fields with newly selected date
+        // update calendar input fields with newly selected date
         // noinspection JSUnresolvedVariable
         updateCalendarFields(
             dateString,
@@ -1299,7 +1332,7 @@ jQuery(document).ready(function ($) {
             instance.settings.dateFormat,
             instance.settings.altFormat
         );
-        //change calendar state
+        // change calendar state
         switchCalendarState(calendar);
     }
 
@@ -1353,32 +1386,33 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function initiateCalendar(order, calendar) {
-        //populate calendar dates from inputs before drawing calendar
+        // populate calendar dates from inputs before drawing calendar
         updateCalendarFromInputs(calendar);
-        //on init set calendar to 'arrival' state
+        // on init set calendar to 'arrival' state
         setCalendarState(calendar, arrival);
-        //grab currently selected date if any
+        // grab currently selected date if any
         let arrivalInput = getCalendarInputField(arrival, calendar);
         let defaultDate = ((null === arrivalInput) || ('' === arrivalInput.value)) ? null : arrivalInput.value;
-        //grab calendar parameters
+        // grab calendar parameters
         let calendarParameters = getCalendarParameters(calendar);
+        // noinspection JSUnusedGlobalSymbols,JSUnresolvedVariable
         let parameters = {
-            //handle days display
+            // handle days display
             beforeShowDay: beforeShowDay,
-            //handle formats
+            // handle formats
             altFormat: calendarParameters.dateFormatDisplay,
             dateFormat: calendarParameters.dateFormat,
-            //handle week start and current day
+            // handle week start and current day
             firstDay: calendarParameters.weekStart,
             defaultDate: defaultDate,
             gotoCurrent: true,
-            //max and min dates
+            // max and min dates
             maxDate: calendarParameters.lastDate,
             minDate: calendarParameters.firstDate,
-            //months display
+            // months display
             showOtherMonths: false,
             numberOfMonths: fitCalendars(calendar),
-            //show rates
+            // show rates
             onChangeMonthYear: function () {
                 lateUpdateCalendarCellData(this);
             },
@@ -1386,15 +1420,15 @@ jQuery(document).ready(function ($) {
                 lateUpdateCalendarCellData(this);
             }
         };
-        //see what type of calendar we have
+        // see what type of calendar we have
         let calendarType = getCalendarType(calendar);
         switch (calendarType) {
-            //if simple display - build 'display only' calendar
+            // if simple display - build 'display only' calendar
             case display:
                 // noinspection JSUnresolvedFunction
                 $(calendar).datepicker(parameters);
                 break;
-            //else attach select date functionality and build calendar
+            // else attach select date functionality and build calendar
             case active:
             default:
                 parameters.onSelect = function (dateString, instance) {
@@ -1408,7 +1442,7 @@ jQuery(document).ready(function ($) {
         lateUpdateCalendarCellData(calendar);
     }
 
-    //handle clear dates button click
+    // handle clear dates button click
     // noinspection JSUnresolvedFunction
     $('.availability-calendar-clear .clear-button').on('click', function () {
         try {
@@ -1422,7 +1456,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    //handle help button click
+    // handle help button click
     // noinspection JSUnresolvedFunction
     $('.availability-calendar-help .help-button').on('click', function () {
         // noinspection JSUnresolvedFunction
