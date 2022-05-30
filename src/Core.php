@@ -574,75 +574,90 @@ class Core {
 	}
 
 	/**
+	 * @return array First date data from availability array.
+	 */
+	protected function getAvailabilityFirstDate(): array {
+		$availability = $this->getAvailability();
+		if ( empty( $availability ) ) {
+			return array();
+		}
+		$firstDateKey = array_keys( $availability )[0];
+
+		return $availability[ $firstDateKey ];
+	}
+
+	/**
+	 * @return array Last date data from availability array.
+	 */
+	protected function getAvailabilityLastDate(): array {
+		$availability = $this->getAvailability();
+		if ( empty( $availability ) ) {
+			return array();
+		}
+		$lastDateKey = array_keys( $availability )[ count( $availability ) - 1 ];
+
+		return $availability[ $lastDateKey ];
+	}
+
+	/**
 	 * @return string
 	 */
 	protected function getFirstDate(): string {
 		$user_parameters = $this->getParameters();
-		if (
-			self::isEmpty( $dates = $this->getAvailability() )
-			|| self::isEmpty( $first = array_shift( $dates ) )
-			|| empty( $first['date'] )
-		) {
-			if ( empty( $user_parameters['daysInAdvance'] ) ) {
-				return date( $user_parameters['srcDateFormat'], strtotime( 'today' ) );
-			}
 
-			return date(
-				$user_parameters['srcDateFormat'],
-				strtotime(
-					sprintf( '+%1$d day', $user_parameters['daysInAdvance'] ),
-					strtotime( 'today' )
-				)
-			);
+		$today      = current_time( $user_parameters['srcDateFormat'] );
+		$first      = $this->getAvailabilityFirstDate();
+		$first_date = empty( $first['date'] ) ? $today : $first['date'];
+
+		if ( 0 === ( $daysInAdvance = absint( $user_parameters['daysInAdvance'] ) ) ) {
+			return $first_date;
 		}
 
-		return empty( $user_parameters['daysInAdvance'] ) ?
-			$first['date']
-			: date(
-				$user_parameters['srcDateFormat'],
+		return date(
+			$user_parameters['srcDateFormat'],
+			max(
 				strtotime(
-					sprintf( '+%1$d day', $user_parameters['daysInAdvance'] ),
+					sprintf( '+%d days', $daysInAdvance ),
 					date_create_from_format(
 						$user_parameters['srcDateFormat'],
-						$first['date']
-					)->format( 'U' )
-				)
-			);
+						$today
+					)->getTimestamp()
+				),
+				date_create_from_format(
+					$user_parameters['srcDateFormat'],
+					$first_date
+				)->getTimestamp()
+			)
+		);
+
 	}
 
 	/**
-	 * @param string $format
-	 *
 	 * @return string
 	 */
-	protected function getLastDate( string $format = self::DEFAULT_DATE_FORMAT ): string {
+	protected function getLastDate(): string {
 		$user_parameters = $this->getParameters();
-		if (
-			self::isEmpty( $dates = $this->getAvailability() )
-			|| self::isEmpty( $last = array_pop( $dates ) )
-			|| empty( $last['date'] )
-		) {
-			if ( empty( $user_parameters['bookingWindow'] ) ) {
-				//return empty string as 0 is no limit
-				return '';
-			}
+		$last            = $this->getAvailabilityLastDate();
 
-			return date(
-				$format,
-				strtotime( sprintf( '+%1$d day', $user_parameters['bookingWindow'] ) )
-			);
+		if ( empty( $last['date'] ) ) {
+			return ( 0 === ( $bookingWindow = absint( $user_parameters['bookingWindow'] ) ) ) ?
+				''
+				: date(
+					$user_parameters['srcDateFormat'],
+					strtotime( sprintf( '+%1$d day', $bookingWindow ) )
+				);
 		}
 
-		$max_stay = empty( $last['maxStay'] ) ? $user_parameters['maxStay'] : $last['maxStay'];
+		$max_stay = absint( empty( $last['maxStay'] ) ? $user_parameters['maxStay'] : $last['maxStay'] );
 
 		return date(
 			$user_parameters['srcDateFormat'],
 			strtotime(
-				sprintf( '+%1$d day', $max_stay ),
+				sprintf( '+%1$d days', $max_stay ),
 				date_create_from_format(
 					$user_parameters['srcDateFormat'],
 					$last['date']
-				)->format( 'U' )
+				)->getTimestamp()
 			)
 		);
 	}
