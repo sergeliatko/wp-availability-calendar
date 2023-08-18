@@ -1342,7 +1342,12 @@ jQuery(document).ready(function ($) {
      * @returns {number}
      */
     function fitCalendars(calendar) {
-        return Math.max(1, Math.floor(calendar.offsetWidth / 317.2));
+        let fontSize = window.getComputedStyle(calendar, null).getPropertyValue('font-size') || '16px';
+        if ('' === fontSize) {
+            fontSize = '16px';
+        }
+        fontSize = parseFloat(fontSize.replace('/[^\d]/', ''));
+        return Math.max(1, Math.floor(calendar.offsetWidth / ((fontSize * 21) + 1)));
     }
 
     /**
