@@ -80,12 +80,12 @@ class Core {
 	 */
 	public static function localizeScripts(): void {
 		wp_localize_script(
-			self::SCRIPTS_HANDLE,
+			static::SCRIPTS_HANDLE,
 			'availabilityCalendar',
 			array(
-				'calendars' => self::getInstances(),
-				'messages'  => self::getMessages(),
-				'defaults'  => self::getGlobalDefaults(),
+				'calendars' => static::getInstances(),
+				'messages'  => static::getMessages(),
+				'defaults'  => static::getGlobalDefaults(),
 			)
 		);
 	}
@@ -97,8 +97,8 @@ class Core {
 		return array(
 			'css' => array(
 				array(
-					self::SCRIPTS_HANDLE,
-					self::maybeMinify( self::pathToUrl(
+					static::SCRIPTS_HANDLE,
+					static::maybeMinify( static::pathToUrl(
 						dirname( __FILE__, 2 ) . '/includes/css/availability-calendar.css'
 					) ),
 					array( 'dashicons' ),
@@ -108,8 +108,8 @@ class Core {
 			),
 			'js'  => array(
 				array(
-					self::SCRIPTS_HANDLE,
-					self::maybeMinify( self::pathToUrl(
+					static::SCRIPTS_HANDLE,
+					static::maybeMinify( static::pathToUrl(
 						dirname( __FILE__, 2 ) . '/includes/js/availability-calendar.js'
 					) ),
 					array( 'jquery-ui-datepicker' ),
@@ -128,7 +128,7 @@ class Core {
 			$hook = is_admin() ? 'admin_print_footer_scripts' : 'wp_print_footer_scripts';
 			add_action( $hook, array( 'SergeLiatko\WPAvailabilityCalendar\Core', 'localizeScripts' ), 0, 0 );
 		}
-		self::$scripts_enqueued = $scripts_enqueued;
+		static::$scripts_enqueued = $scripts_enqueued;
 	}
 
 
@@ -136,14 +136,14 @@ class Core {
 	 * @return string
 	 */
 	public function __toString(): string {
-		self::maybeEnqueueScripts();
+		static::maybeEnqueueScripts();
 
 		return HTMLContainer::HTML(
 			$this->getContainerHtmlAttributes(),
 			HTMLContainer::HTML( array( 'class' => 'availability-calendar-messages' ) ) .
 			$this->toHTML() .
-			self::getClearHtml() .
-			self::getHelpHtml()
+			static::getClearHtml() .
+			static::getHelpHtml()
 		);
 	}
 
@@ -151,17 +151,17 @@ class Core {
 	 * @return string
 	 */
 	protected static function getHelpHtml(): string {
-		if ( empty( self::$help_html ) ) {
+		if ( empty( static::$help_html ) ) {
 			$items = array(
-				'available'   => self::getMessage( 'available' ),
-				'not-allowed' => self::getMessage( 'legendNoArrivalsDepartures' ),
-				'unavailable' => self::getMessage( 'unavailable' ),
-				'preselected' => self::getMessage( 'minimumStayPeriod' ),
-				'selected'    => self::getMessage( 'selectedStay' ),
-				'conflict'    => self::getMessage( 'legendConflict' ),
-				'reset'       => self::getMessage( 'legendReset' ),
-				'help'        => self::getMessage( 'legendHelp' ),
-				'prompt'      => self::getMessage( 'legendPrompt' ),
+				'available'   => static::getMessage( 'available' ),
+				'not-allowed' => static::getMessage( 'legendNoArrivalsDepartures' ),
+				'unavailable' => static::getMessage( 'unavailable' ),
+				'preselected' => static::getMessage( 'minimumStayPeriod' ),
+				'selected'    => static::getMessage( 'selectedStay' ),
+				'conflict'    => static::getMessage( 'legendConflict' ),
+				'reset'       => static::getMessage( 'legendReset' ),
+				'help'        => static::getMessage( 'legendHelp' ),
+				'prompt'      => static::getMessage( 'legendPrompt' ),
 			);
 			array_walk( $items, function ( &$content, $class ) {
 				switch ( $class ) {
@@ -222,7 +222,7 @@ class Core {
 						array(
 							'class' => 'help-button',
 						),
-						'<span class="dashicons dashicons-info-outline"></span>' . self::getMessage( 'help' ),
+						'<span class="dashicons dashicons-info-outline"></span>' . static::getMessage( 'help' ),
 						'span'
 					),
 					'p'
@@ -234,24 +234,24 @@ class Core {
 					join( '', $items )
 				)
 			);
-			self::setHelpHtml( $html );
+			static::setHelpHtml( $html );
 		}
 
-		return self::$help_html;
+		return static::$help_html;
 	}
 
 	/**
 	 * @param string $help_html
 	 */
 	protected static function setHelpHtml( string $help_html ) {
-		self::$help_html = $help_html;
+		static::$help_html = $help_html;
 	}
 
 	/**
 	 * @return string
 	 */
 	protected static function getClearHtml(): string {
-		if ( self::isEmpty( self::$clear_html ) ) {
+		if ( static::isEmpty( static::$clear_html ) ) {
 			$clear_html = HTMLContainer::HTML(
 				array(
 					'class' => 'availability-calendar-clear',
@@ -260,22 +260,22 @@ class Core {
 					array(
 						'class' => 'clear-button',
 					),
-					'<span class="dashicons dashicons-no-alt"></span>' . self::getMessage( 'clear' ),
+					'<span class="dashicons dashicons-no-alt"></span>' . static::getMessage( 'clear' ),
 					'span'
 				),
 				'p'
 			);
-			self::setClearHtml( $clear_html );
+			static::setClearHtml( $clear_html );
 		}
 
-		return self::$clear_html;
+		return static::$clear_html;
 	}
 
 	/**
 	 * @param string $clear_html
 	 */
 	protected static function setClearHtml( string $clear_html ): void {
-		self::$clear_html = $clear_html;
+		static::$clear_html = $clear_html;
 	}
 
 	/**
@@ -284,9 +284,9 @@ class Core {
 	 * @return $this
 	 */
 	protected function addInstance( array $instance ): Core {
-		$instances                               = self::getInstances();
+		$instances                               = static::getInstances();
 		$instances[ $this->getInstanceNumber() ] = $instance;
-		self::setInstances( $instances );
+		static::setInstances( $instances );
 
 		return $this;
 	}
@@ -295,36 +295,36 @@ class Core {
 	 * @return array|array[]
 	 */
 	protected static function getInstances(): array {
-		if ( !is_array( self::$instances ) ) {
-			self::setInstances( array() );
+		if ( !is_array( static::$instances ) ) {
+			static::setInstances( array() );
 		}
 
-		return self::$instances;
+		return static::$instances;
 	}
 
 	/**
 	 * @param array|array[] $instances
 	 */
 	protected static function setInstances( array $instances ): void {
-		self::$instances = $instances;
+		static::$instances = $instances;
 	}
 
 	/**
 	 * @return string[]
 	 */
 	protected static function getMessages(): array {
-		if ( !is_array( self::$messages ) ) {
-			self::setMessages( self::getDefaultMessages() );
+		if ( !is_array( static::$messages ) ) {
+			static::setMessages( static::getDefaultMessages() );
 		}
 
-		return self::$messages;
+		return static::$messages;
 	}
 
 	/**
 	 * @param string[] $messages
 	 */
 	protected static function setMessages( array $messages ): void {
-		self::$messages = $messages;
+		static::$messages = $messages;
 	}
 
 	/**
@@ -333,7 +333,7 @@ class Core {
 	 * @return string
 	 */
 	protected static function getMessage( string $message ): string {
-		$messages = self::getMessages();
+		$messages = static::getMessages();
 
 		return empty( $messages[ $message ] ) ? '' : $messages[ $message ];
 	}
@@ -385,16 +385,16 @@ class Core {
 	 */
 	protected static function getGlobalDefaults(): array {
 		return apply_filters( 'availability_calendar_global_defaults', array(
-			'dateFormat'           => self::PHPDateFormatToJSDatePicker( self::DEFAULT_DATE_FORMAT ),
-			'dateFormatDisplay'    => self::PHPDateFormatToJSDatePicker(
-				get_option( 'date_format', self::DEFAULT_DATE_FORMAT )
+			'dateFormat'           => static::PHPDateFormatToJSDatePicker( static::DEFAULT_DATE_FORMAT ),
+			'dateFormatDisplay'    => static::PHPDateFormatToJSDatePicker(
+				get_option( 'date_format', static::DEFAULT_DATE_FORMAT )
 			),
-			'maxStay'              => self::DEFAULT_MAX_STAY,
-			'minStay'              => self::DEFAULT_MIN_STAY,
-			'bookingWindow'        => self::DEFAULT_BOOKING_WINDOW,
-			'daysInAdvance'        => self::DEFAULT_DAYS_IN_ADVANCE,
-			'showRates'            => self::DEFAULT_SHOW_RATES,
-			'hideUnavailableRates' => self::DEFAULT_HIDE_UNAVAILABLE_RATES,
+			'maxStay'              => static::DEFAULT_MAX_STAY,
+			'minStay'              => static::DEFAULT_MIN_STAY,
+			'bookingWindow'        => static::DEFAULT_BOOKING_WINDOW,
+			'daysInAdvance'        => static::DEFAULT_DAYS_IN_ADVANCE,
+			'showRates'            => static::DEFAULT_SHOW_RATES,
+			'hideUnavailableRates' => static::DEFAULT_HIDE_UNAVAILABLE_RATES,
 		) );
 	}
 
@@ -403,7 +403,7 @@ class Core {
 	 */
 	protected function getInstanceNumber(): int {
 		if ( !is_int( $this->instance_number ) ) {
-			$this->setInstanceNumber( count( self::getInstances() ) );
+			$this->setInstanceNumber( count( static::getInstances() ) );
 		}
 
 		return $this->instance_number;
@@ -437,7 +437,7 @@ class Core {
 	 * @return Core
 	 */
 	protected function setParameters( array $parameters ): Core {
-		$this->parameters = self::parseArgsRecursive(
+		$this->parameters = static::parseArgsRecursive(
 			$parameters,
 			$this->getDefaultParameters()
 		);
@@ -483,7 +483,7 @@ class Core {
 	 */
 	protected function getCalendarParameters(): array {
 		return array_diff_key(
-			self::parseArgsRecursive( array(
+			static::parseArgsRecursive( array(
 				'firstDate' => $this->getFirstDate(),
 				'lastDate'  => $this->getLastDate(),
 			), $this->getParameters() ),
@@ -542,19 +542,19 @@ class Core {
 			),
 			'arrivalId'            => $this->getArrivalHtmlId(),
 			'arrivalDisplayId'     => $this->getArrivalDisplayHtmlId(),
-			'srcDateFormat'        => self::DEFAULT_DATE_FORMAT,
-			'dateFormat'           => self::PHPDateFormatToJSDatePicker( self::DEFAULT_DATE_FORMAT ),
-			'dateFormatDisplay'    => self::PHPDateFormatToJSDatePicker(
-				get_option( 'date_format', self::DEFAULT_DATE_FORMAT )
+			'srcDateFormat'        => static::DEFAULT_DATE_FORMAT,
+			'dateFormat'           => static::PHPDateFormatToJSDatePicker( static::DEFAULT_DATE_FORMAT ),
+			'dateFormatDisplay'    => static::PHPDateFormatToJSDatePicker(
+				get_option( 'date_format', static::DEFAULT_DATE_FORMAT )
 			),
 			'departureId'          => $this->getDepartureHtmlId(),
 			'departureDisplayId'   => $this->getDepartureDisplayHtmlId(),
-			'maxStay'              => self::DEFAULT_MAX_STAY,
-			'minStay'              => self::DEFAULT_MIN_STAY,
-			'daysInAdvance'        => self::DEFAULT_DAYS_IN_ADVANCE,
-			'bookingWindow'        => self::DEFAULT_BOOKING_WINDOW,
-			'showRates'            => self::DEFAULT_SHOW_RATES,
-			'hideUnavailableRates' => self::DEFAULT_HIDE_UNAVAILABLE_RATES,
+			'maxStay'              => static::DEFAULT_MAX_STAY,
+			'minStay'              => static::DEFAULT_MIN_STAY,
+			'daysInAdvance'        => static::DEFAULT_DAYS_IN_ADVANCE,
+			'bookingWindow'        => static::DEFAULT_BOOKING_WINDOW,
+			'showRates'            => static::DEFAULT_SHOW_RATES,
+			'hideUnavailableRates' => static::DEFAULT_HIDE_UNAVAILABLE_RATES,
 			'weekStart'            => absint( get_option( 'start_of_week', 0 ) ),
 		);
 
@@ -677,7 +677,7 @@ class Core {
 	 * @return string
 	 */
 	protected function getName(): string {
-		return self::NAME;
+		return static::NAME;
 	}
 
 	/**

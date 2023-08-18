@@ -34,12 +34,12 @@ trait ScriptsTrait {
 	 * Loads scripts in WP if necessary.
 	 */
 	protected static function maybeEnqueueScripts() {
-		if ( !self::isScriptsEnqueued() ) {
+		if ( !static::isScriptsEnqueued() ) {
 			/**
 			 * @var string $type
 			 * @var array  $scripts
 			 */
-			foreach ( self::getScripts() as $type => $scripts ) {
+			foreach ( static::getScripts() as $type => $scripts ) {
 				switch ( $type ) {
 					case 'css':
 						$callback = 'wp_enqueue_style';
@@ -54,7 +54,7 @@ trait ScriptsTrait {
 					call_user_func_array( $callback, $script );
 				}
 			}
-			self::setScriptsEnqueued( true );
+			static::setScriptsEnqueued( true );
 		}
 	}
 
@@ -62,32 +62,32 @@ trait ScriptsTrait {
 	 * @return bool
 	 */
 	protected static function isScriptsEnqueued(): bool {
-		return !empty( self::$scripts_enqueued );
+		return !empty( static::$scripts_enqueued );
 	}
 
 	/**
 	 * @param bool $scripts_enqueued
 	 */
 	protected static function setScriptsEnqueued( bool $scripts_enqueued ): void {
-		self::$scripts_enqueued = $scripts_enqueued;
+		static::$scripts_enqueued = $scripts_enqueued;
 	}
 
 	/**
 	 * @return array
 	 */
 	protected static function getScripts(): array {
-		if ( !is_array( self::$scripts ) ) {
-			self::setScripts( array() );
+		if ( !is_array( static::$scripts ) ) {
+			static::setScripts( array() );
 		}
 
-		return self::$scripts;
+		return static::$scripts;
 	}
 
 	/**
 	 * @param array $scripts
 	 */
 	protected static function setScripts( array $scripts ): void {
-		self::$scripts = wp_parse_args( $scripts, self::defaultScripts() );
+		static::$scripts = wp_parse_args( $scripts, static::defaultScripts() );
 	}
 
 	/**
@@ -114,7 +114,7 @@ trait ScriptsTrait {
 	 * @noinspection PhpUnused
 	 */
 	protected static function maybeMinify( $url ): string {
-		$min = self::min();
+		$min = static::min();
 
 		return empty( $min ) ?
 			$url
