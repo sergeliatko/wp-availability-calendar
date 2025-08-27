@@ -15,7 +15,7 @@ trait IsEmptyTrait {
 	 *
 	 * @return bool
 	 */
-	protected static function isEmpty( $data = null ) {
+	protected static function isEmpty( mixed $data = null ): bool {
 		return empty( $data );
 	}
 

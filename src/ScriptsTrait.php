@@ -13,12 +13,12 @@ trait ScriptsTrait {
 	/**
 	 * @var bool $scripts_enqueued
 	 */
-	protected static $scripts_enqueued;
+	protected static bool $scripts_enqueued = false;
 
 	/**
-	 * @var array $scripts
+	 * @var array|null $scripts
 	 */
-	protected static $scripts;
+	protected static ?array $scripts = null;
 
 	/**
 	 * @return array|array[]
@@ -33,22 +33,17 @@ trait ScriptsTrait {
 	/**
 	 * Loads scripts in WP if necessary.
 	 */
-	protected static function maybeEnqueueScripts() {
-		if ( !static::isScriptsEnqueued() ) {
+	protected static function maybeEnqueueScripts(): void {
+		if ( ! static::isScriptsEnqueued() ) {
 			/**
 			 * @var string $type
-			 * @var array  $scripts
+			 * @var array $scripts
 			 */
 			foreach ( static::getScripts() as $type => $scripts ) {
-				switch ( $type ) {
-					case 'css':
-						$callback = 'wp_enqueue_style';
-						break;
-					case 'js':
-					default:
-						$callback = 'wp_enqueue_script';
-						break;
-				}
+				$callback = match ( $type ) {
+					'css' => 'wp_enqueue_style',
+					default => 'wp_enqueue_script',
+				};
 				/** @var array $script */
 				foreach ( $scripts as $script ) {
 					call_user_func_array( $callback, $script );
@@ -62,7 +57,7 @@ trait ScriptsTrait {
 	 * @return bool
 	 */
 	protected static function isScriptsEnqueued(): bool {
-		return !empty( static::$scripts_enqueued );
+		return ! empty( static::$scripts_enqueued );
 	}
 
 	/**
@@ -76,7 +71,7 @@ trait ScriptsTrait {
 	 * @return array
 	 */
 	protected static function getScripts(): array {
-		if ( !is_array( static::$scripts ) ) {
+		if ( ! is_array( static::$scripts ) ) {
 			static::setScripts( array() );
 		}
 

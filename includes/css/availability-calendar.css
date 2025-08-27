@@ -1,4 +1,5 @@
 /* variables */
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-wrapper {
     --border: #DDDDDD;
     --header: #DDDDDD;
@@ -20,11 +21,13 @@
     margin: 1.5em auto;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-inline {
     max-width: 318px;
     margin: 0 auto;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-header {
     border: 1px solid var(--border);
     border-bottom-width: 0;
@@ -33,18 +36,21 @@
     padding: 0.625em 1.125em;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-prev {
     position: absolute;
     top: 0.625em;
     left: 0.5em;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-next {
     position: absolute;
     top: 0.625em;
     right: 0;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker .ui-icon {
     cursor: pointer;
     display: block;
@@ -53,11 +59,13 @@
     white-space: nowrap;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker .ui-state-disabled .ui-icon {
     cursor: default;
     opacity: 0.35;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker .ui-icon:before {
     display: inline-block;
     content: "";
@@ -67,18 +75,21 @@
     opacity: 0.65;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker .ui-icon.ui-icon-circle-triangle-w:before {
     border-top: 0.5em solid transparent;
     border-bottom: 0.5em solid transparent;
     border-right: 0.5em solid;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker .ui-icon.ui-icon-circle-triangle-e:before {
     border-top: 0.5em solid transparent;
     border-bottom: 0.5em solid transparent;
     border-left: 0.5em solid;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar {
     border-collapse: collapse;
     border: 1px solid var(--border);
@@ -101,7 +112,7 @@
 }
 
 /* multiple calendars */
-/*noinspection DuplicatedCode*/
+/*noinspection DuplicatedCode,CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-inline.ui-datepicker-multi {
     box-sizing: border-box;
     clear: both;
@@ -115,11 +126,13 @@
     width: 100% !important;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-multi .ui-datepicker-group {
     flex: 0 1 auto;
     align-self: auto;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-multi .ui-datepicker-row-break {
     display: block;
     margin: 0;
@@ -128,6 +141,7 @@
 }
 
 /* typography */
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-header {
     font-size: 16px;
     line-height: 1.2;
@@ -143,11 +157,13 @@
     vertical-align: middle;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar th.ui-datepicker-week-end,
 .availability-calendar .ui-datepicker-calendar td.ui-datepicker-week-end {
     font-weight: bold;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar a,
 .availability-calendar .ui-datepicker-prev,
 .availability-calendar .ui-datepicker-next {
@@ -164,6 +180,7 @@
     white-space: nowrap;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar .rate.old-rate {
     font-size: 0.5em;
     font-weight: lighter;
@@ -171,6 +188,7 @@
     position: relative;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar .rate.old-rate:after {
     border-bottom: 1px solid;
     content: "";
@@ -220,14 +238,17 @@
     background-image: linear-gradient(to right bottom, var(--available) 50%, var(--available) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.arrival-available.departure-unavailable {
     background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--available) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.arrival-unavailable.departure-available {
     background-image: linear-gradient(to right bottom, var(--available) 50%, var(--unavailable) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.arrival-unavailable.departure-unavailable {
     background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--unavailable) 50%);
 }
@@ -237,6 +258,7 @@
     background-image: linear-gradient(to right bottom, var(--available) 50%, var(--selected) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-arrival.departure-unavailable {
     background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--selected) 50%);
 }
@@ -245,6 +267,7 @@
     background-image: linear-gradient(to right bottom, var(--available) 50%, var(--conflict) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-arrival.arrival-conflict.departure-unavailable {
     background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--conflict) 50%);
 }
@@ -254,6 +277,7 @@
     background-image: linear-gradient(to right bottom, var(--selected) 50%, var(--available) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-departure.arrival-unavailable {
     background-image: linear-gradient(to right bottom, var(--selected) 50%, var(--unavailable) 50%);
 }
@@ -262,6 +286,7 @@
     background-image: linear-gradient(to right bottom, var(--conflict) 50%, var(--available) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-departure.departure-conflict.arrival-unavailable {
     background-image: linear-gradient(to right bottom, var(--conflict) 50%, var(--unavailable) 50%);
 }
@@ -284,22 +309,27 @@
 }
 
 /* minimum stay requirement */
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-arrival.departure-available.minimum-stay-requirement {
     background-image: linear-gradient(to right bottom, var(--available) 50%, var(--preselected) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-arrival.departure-unavailable.minimum-stay-requirement {
     background-image: linear-gradient(to right bottom, var(--unavailable) 50%, var(--preselected) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-stay:not([class*="conflict"]).minimum-stay-requirement {
     background-image: linear-gradient(to right bottom, var(--preselected) 50%, var(--preselected) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-departure.arrival-available.minimum-stay-requirement {
     background-image: linear-gradient(to right bottom, var(--preselected) 50%, var(--available) 50%);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar .ui-datepicker-calendar td.selected-departure.arrival-unavailable.minimum-stay-requirement {
     background-image: linear-gradient(to right bottom, var(--preselected) 50%, var(--unavailable) 50%);
 }
@@ -323,6 +353,7 @@
     padding: 0.375em;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-clear,
 .availability-calendar-help {
     font-size: 14px;
@@ -330,6 +361,7 @@
     margin: 1em auto 0.5em;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-clear {
     text-align: center;
 }
@@ -339,6 +371,7 @@
     color: var(--conflict);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help.state-open {
     margin-bottom: 1.5em;
 }
@@ -359,21 +392,25 @@
     opacity: 1;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help .help-inner {
     display: none;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help.state-open .help-inner {
     border: 1px solid var(--border);
     display: block;
     padding: 0.5em 0.75em;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help p.help-button-wrapper {
     margin-bottom: 0;
     text-align: right;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help.state-open p.help-button-wrapper {
     margin-bottom: 1em;
 }
@@ -407,6 +444,7 @@
     opacity: 0.85;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help p.legend-item {
     margin-bottom: 5px;
 }
@@ -417,6 +455,7 @@
     vertical-align: middle;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help .legend-icon {
     border: 1px solid var(--border);
     color: var(--color);
@@ -427,11 +466,13 @@
     text-align: center;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help .legend-icon-available,
 .availability-calendar-help .legend-icon-not-allowed {
     background-color: var(--available);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar[data-state="arrival"] td.arrival-available.arrival-prohibited .ui-state-default:before,
 .availability-calendar[data-state="departure"] td.departure-available.departure-prohibited .ui-state-default:before,
 .availability-calendar-help .legend-icon-not-allowed:before {
@@ -441,18 +482,22 @@
     vertical-align: super;
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help .legend-icon-unavailable {
     background-color: var(--unavailable);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help .legend-icon-preselected {
     background-color: var(--preselected);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help .legend-icon-selected {
     background-color: var(--selected);
 }
 
+/*noinspection CssUnusedSymbol*/
 .availability-calendar-help .legend-icon-conflict {
     background-color: var(--conflict);
 }

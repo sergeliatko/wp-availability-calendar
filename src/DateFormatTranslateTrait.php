@@ -69,11 +69,7 @@ trait DateFormatTranslateTrait {
 					$jquery_format .= "'";
 					$escaping      = false;
 				}
-				if ( isset( $rules[ $char ] ) ) {
-					$jquery_format .= $rules[ $char ];
-				} else {
-					$jquery_format .= $char;
-				}
+				$jquery_format .= $rules[ $char ] ?? $char;
 			}
 		}
 

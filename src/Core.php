@@ -12,51 +12,51 @@ class Core {
 
 	use DateFormatTranslateTrait, HTMLTagTrait, IsEmptyTrait, ParseArgsRecursiveTrait, ScriptsTrait;
 
-	protected const DEFAULT_DATE_FORMAT            = 'Y-m-d';
-	protected const NAME                           = 'availability-calendar';
-	protected const SCRIPTS_HANDLE                 = 'availability-calendar';
-	protected const DEFAULT_DAYS_IN_ADVANCE        = 0;
-	protected const DEFAULT_BOOKING_WINDOW         = 365;
-	protected const DEFAULT_MIN_STAY               = 1;
-	protected const DEFAULT_MAX_STAY               = 180;
-	protected const DEFAULT_SHOW_RATES             = false;
+	protected const DEFAULT_DATE_FORMAT = 'Y-m-d';
+	protected const NAME = 'availability-calendar';
+	protected const SCRIPTS_HANDLE = 'availability-calendar';
+	protected const DEFAULT_DAYS_IN_ADVANCE = 0;
+	protected const DEFAULT_BOOKING_WINDOW = 365;
+	protected const DEFAULT_MIN_STAY = 1;
+	protected const DEFAULT_MAX_STAY = 180;
+	protected const DEFAULT_SHOW_RATES = false;
 	protected const DEFAULT_HIDE_UNAVAILABLE_RATES = false;
-	protected const XHTML                          = false;
+	protected const XHTML = false;
 
 	/**
-	 * @var array|array[] $instances
+	 * @var array|array[]|null $instances
 	 */
-	protected static $instances;
+	protected static ?array $instances = null;
 
 	/**
-	 * @var string[]
+	 * @var string[]|null
 	 */
-	protected static $messages;
+	protected static ?array $messages = null;
 
 	/**
-	 * @var string $help_html
+	 * @var string|null $help_html
 	 */
-	protected static $help_html;
+	protected static ?string $help_html = null;
 
 	/**
-	 * @var string $clear_html
+	 * @var string|null $clear_html
 	 */
-	protected static $clear_html;
+	protected static ?string $clear_html = null;
 
 	/**
-	 * @var int $instance_number
+	 * @var int|null $instance_number
 	 */
-	protected $instance_number;
+	protected ?int $instance_number = null;
 
 	/**
-	 * @var array|array[] $availability
+	 * @var array|array[]|null $availability
 	 */
-	protected $availability;
+	protected ?array $availability = null;
 
 	/**
-	 * @var array $parameters
+	 * @var array|null $parameters
 	 */
-	protected $parameters;
+	protected ?array $parameters = null;
 
 	/**
 	 * Core constructor.
@@ -164,45 +164,31 @@ class Core {
 				'prompt'      => static::getMessage( 'legendPrompt' ),
 			);
 			array_walk( $items, function ( &$content, $class ) {
-				switch ( $class ) {
-					case 'reset':
-						$content_prefix = HTMLContainer::HTML(
-							array( 'class' => 'dashicons dashicons-saved' ),
-							'',
-							'span'
-						);
-						break;
-					case 'help':
-						$content_prefix = HTMLContainer::HTML(
-							array( 'class' => 'dashicons dashicons-info-outline' ),
-							'',
-							'span'
-						);
-						break;
-					case 'prompt':
-						$content_prefix = HTMLContainer::HTML(
-							array( 'class' => 'dashicons dashicons-phone' ),
-							'',
-							'span'
-						);
-						break;
-					case 'available':
-					case 'not-allowed':
-					case 'unavailable':
-					case 'preselected':
-					case 'selected':
-					case 'conflict':
-					default:
-						$content_prefix = HTMLContainer::HTML(
-							array(
-								'class' => 'legend-icon legend-icon-' . $class,
-							),
-							rand( 1, 31 ),
-							'span'
-						);
-						break;
-				}
-				$content = HTMLContainer::HTML(
+				$content_prefix = match ( $class ) {
+					'reset' => HTMLContainer::HTML(
+						array( 'class' => 'dashicons dashicons-saved' ),
+						'',
+						'span'
+					),
+					'help' => HTMLContainer::HTML(
+						array( 'class' => 'dashicons dashicons-info-outline' ),
+						'',
+						'span'
+					),
+					'prompt' => HTMLContainer::HTML(
+						array( 'class' => 'dashicons dashicons-phone' ),
+						'',
+						'span'
+					),
+					default => HTMLContainer::HTML(
+						array(
+							'class' => 'legend-icon legend-icon-' . $class,
+						),
+						rand( 1, 31 ),
+						'span'
+					),
+				};
+				$content        = HTMLContainer::HTML(
 					array(
 						'class' => 'legend-item legend-item-' . $class,
 					),
@@ -243,7 +229,7 @@ class Core {
 	/**
 	 * @param string $help_html
 	 */
-	protected static function setHelpHtml( string $help_html ) {
+	protected static function setHelpHtml( string $help_html ): void {
 		static::$help_html = $help_html;
 	}
 
@@ -295,8 +281,8 @@ class Core {
 	 * @return array|array[]
 	 */
 	protected static function getInstances(): array {
-		if ( !is_array( static::$instances ) ) {
-			static::setInstances( array() );
+		if ( ! is_array( static::$instances ) ) {
+			static::setInstances( [] );
 		}
 
 		return static::$instances;
@@ -313,7 +299,7 @@ class Core {
 	 * @return string[]
 	 */
 	protected static function getMessages(): array {
-		if ( !is_array( static::$messages ) ) {
+		if ( ! is_array( static::$messages ) ) {
 			static::setMessages( static::getDefaultMessages() );
 		}
 
@@ -402,7 +388,7 @@ class Core {
 	 * @return int
 	 */
 	protected function getInstanceNumber(): int {
-		if ( !is_int( $this->instance_number ) ) {
+		if ( ! is_int( $this->instance_number ) ) {
 			$this->setInstanceNumber( count( static::getInstances() ) );
 		}
 
@@ -424,7 +410,7 @@ class Core {
 	 * @return array
 	 */
 	protected function getParameters(): array {
-		if ( !is_array( $this->parameters ) ) {
+		if ( ! is_array( $this->parameters ) ) {
 			$this->setParameters( array() );
 		}
 
@@ -449,7 +435,7 @@ class Core {
 	 * @return array|array[]
 	 */
 	protected function getAvailability(): array {
-		if ( !is_array( $this->availability ) ) {
+		if ( ! is_array( $this->availability ) ) {
 			$this->setAvailability( array() );
 		}
 
@@ -457,7 +443,7 @@ class Core {
 	}
 
 	/**
-	 * @param \SergeLiatko\WPAvailabilityCalendar\AvailabilityInterface[] $availability
+	 * @param AvailabilityInterface[] $availability
 	 *
 	 * @return Core
 	 */
@@ -469,7 +455,7 @@ class Core {
 			);
 		} );
 		$dates        = array();
-		/** @var \SergeLiatko\WPAvailabilityCalendar\AvailabilityInterface $date */
+		/** @var AvailabilityInterface $date */
 		foreach ( $availability as $date ) {
 			$dates[ $date->getDate() ] = $date->__toArray();
 		}
@@ -518,7 +504,7 @@ class Core {
 	 *
 	 * @return mixed|null
 	 */
-	protected function getCalendarParameter( string $parameter ) {
+	protected function getCalendarParameter( string $parameter ): mixed {
 		$parameters = $this->getParameters();
 
 		return $parameters[ $parameter ] ?? null;
@@ -563,8 +549,8 @@ class Core {
 		 *
 		 * @filter availability_calendar_default_params
 		 *
-		 * @param array                                    $defaults
-		 * @param \SergeLiatko\WPAvailabilityCalendar\Core $this
+		 * @param array $defaults
+		 * @param Core $this
 		 */
 		return apply_filters(
 			'availability_calendar_default_params',

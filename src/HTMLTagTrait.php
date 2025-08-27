@@ -13,22 +13,22 @@ trait HTMLTagTrait {
 	/**
 	 * @var array $html_attributes
 	 */
-	protected $html_attributes;
+	protected array $html_attributes;
 
 	/**
-	 * @var string $content
+	 * @var string|null $content
 	 */
-	protected $content;
+	protected ?string $content = null;
 
 	/**
 	 * @var string $tag
 	 */
-	protected $tag;
+	protected string $tag;
 
 	/**
-	 * @var bool $self_closing
+	 * @var bool|null $self_closing
 	 */
-	protected $self_closing;
+	protected ?bool $self_closing = null;
 
 	/**
 	 * @return string
@@ -52,7 +52,7 @@ trait HTMLTagTrait {
 	 * @return bool
 	 */
 	protected function isSelfClosing(): bool {
-		if ( !is_bool( $this->self_closing ) ) {
+		if ( ! is_bool( $this->self_closing ) ) {
 			$this->setSelfClosing(
 				in_array( $this->getTag(), array(
 					'area',
@@ -111,14 +111,14 @@ trait HTMLTagTrait {
 	 * @return bool
 	 */
 	protected function isXHTML(): bool {
-		return !empty( self::XHTML );
+		return ! empty( self::XHTML );
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getContent(): string {
-		if ( !is_string( $this->content ) ) {
+		if ( ! is_string( $this->content ) ) {
 			$this->setContent( '' );
 		}
 

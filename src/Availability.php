@@ -13,42 +13,42 @@ class Availability implements AvailabilityInterface {
 	/**
 	 * @var string $date
 	 */
-	public $date;
+	public string $date;
 
 	/**
 	 * @var bool $available
 	 */
-	public $available;
+	public bool $available;
 
 	/**
 	 * @var bool $arrival
 	 */
-	public $arrival;
+	public bool $arrival;
 
 	/**
 	 * @var bool $departure
 	 */
-	public $departure;
+	public bool $departure;
 
 	/**
 	 * @var int $minStay
 	 */
-	public $minStay;
+	public int $minStay;
 
 	/**
 	 * @var int $maxStay
 	 */
-	public $maxStay;
+	public int $maxStay;
 
 	/**
 	 * @var string $rate
 	 */
-	public $rate;
+	public string $rate;
 
 	/**
 	 * @var string $oldRate
 	 */
-	public $oldRate;
+	public string $oldRate;
 
 	/**
 	 * Availability constructor.

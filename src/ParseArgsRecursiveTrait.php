@@ -13,14 +13,14 @@ trait ParseArgsRecursiveTrait {
 	/**
 	 * Parses recursively arguments with their defaults.
 	 *
-	 * @param array|object $args
-	 * @param array|object $default
-	 * @param bool         $preserve_integer_keys
+	 * @param object|array $args
+	 * @param object|array $default
+	 * @param bool $preserve_integer_keys
 	 *
 	 * @return array|object
 	 * @noinspection DuplicatedCode
 	 */
-	protected static function parseArgsRecursive( $args, $default, $preserve_integer_keys = false ) {
+	protected static function parseArgsRecursive( object|array $args, object|array $default, bool $preserve_integer_keys = false ): object|array {
 
 		if ( !is_array( $default ) && !is_object( $default ) ) {
 			return wp_parse_args( $args, $default );
