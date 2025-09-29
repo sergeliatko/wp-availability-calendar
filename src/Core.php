@@ -91,6 +91,17 @@ class Core {
 	}
 
 	/**
+	 * @return string[]
+	 */
+	public static function getMessages(): array {
+		if ( ! is_array( static::$messages ) ) {
+			static::setMessages( static::getDefaultMessages() );
+		}
+
+		return static::$messages;
+	}
+
+	/**
 	 * @inheritDoc
 	 */
 	protected static function defaultScripts(): array {
@@ -120,6 +131,7 @@ class Core {
 		);
 	}
 
+
 	/**
 	 * @inheritDoc
 	 */
@@ -130,7 +142,6 @@ class Core {
 		}
 		static::$scripts_enqueued = $scripts_enqueued;
 	}
-
 
 	/**
 	 * @return string
@@ -296,17 +307,6 @@ class Core {
 	}
 
 	/**
-	 * @return string[]
-	 */
-	protected static function getMessages(): array {
-		if ( ! is_array( static::$messages ) ) {
-			static::setMessages( static::getDefaultMessages() );
-		}
-
-		return static::$messages;
-	}
-
-	/**
 	 * @param string[] $messages
 	 */
 	protected static function setMessages( array $messages ): void {
@@ -363,6 +363,8 @@ class Core {
 			'legendHelp'                 => 'Right click (or long press on touch screens) on a date to show details.',
 			'legendPrompt'               => 'Feel free to contact us if you need assistance with availability or booking rules.',
 			'unknownError'               => 'An error occurred. Please retry or contact us for assistance.',
+			'nextMonth'                  => 'Next',
+			'prevMonth'                  => 'Previous',
 		) );
 	}
 

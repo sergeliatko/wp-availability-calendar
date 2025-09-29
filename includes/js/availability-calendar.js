@@ -941,6 +941,8 @@ jQuery(document).ready(function ($) {
     function lateUpdateCalendarCellData(calendar) {
         window.setTimeout(function (calendar) {
             updateCalendarCellData(calendar);
+            // apply nav-button accessibility attributes
+            navButtonAccessibility(calendar);
         }, 250, calendar);
     }
 
@@ -1446,6 +1448,23 @@ jQuery(document).ready(function ($) {
         }
         lateUpdateCalendarCellData(calendar);
     }
+
+    // pull out nav-button accessibility tweaks into reusable variable
+    const navButtonAccessibility = function (calendar) {
+        // noinspection JSUnresolvedReference
+        $(calendar).find('.ui-datepicker-next, .ui-datepicker-prev').each(function () {
+            // add role="button" for accessibility
+            this.setAttribute('role', 'button');
+            // add title for accessibility
+            if (this.classList.contains('ui-datepicker-next')) {
+                // noinspection JSUnresolvedReference
+                this.setAttribute('title', availabilityCalendar.messages.nextMonth);
+            } else {
+                // noinspection JSUnresolvedReference
+                this.setAttribute('title', availabilityCalendar.messages.previousMonth);
+            }
+        });
+    };
 
     // handle clear dates button click
     // noinspection JSUnresolvedFunction
