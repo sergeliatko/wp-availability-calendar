@@ -76,7 +76,7 @@ class Core {
 	}
 
 	/**
-	 * Adds instances as javascript variable in WP.
+	 * Adds instances as JavaScript variable in WP.
 	 */
 	public static function localizeScripts(): void {
 		wp_localize_script(
