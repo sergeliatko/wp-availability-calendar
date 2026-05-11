@@ -124,8 +124,11 @@ class Core {
 						dirname( __FILE__, 2 ) . '/includes/js/availability-calendar.js'
 					) ),
 					array( 'jquery-ui-datepicker' ),
-					null,
-					true,
+					apply_filters( 'wp_availability_calendar_asset_version', null ),
+					array(
+						'in_footer' => true,
+						'strategy'  => 'defer',
+					),
 				),
 			),
 		);

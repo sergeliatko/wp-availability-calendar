@@ -1,6 +1,6 @@
 /* global availabilityCalendar, jQuery */
 // noinspection JSUnusedGlobalSymbols
-jQuery(document).ready(function ($) {
+jQuery(function ($) {
 
     /**
      * Atom date format to store date key.
@@ -119,7 +119,8 @@ jQuery(document).ready(function ($) {
     function dateToString(date, format) {
         try {
             // noinspection JSUnresolvedVariable,JSUnresolvedFunction
-            return $.datepicker.formatDate(format, date);
+            // noinspection JSCheckFunctionSignatures
+            return $.datepicker.formatDate(format, date, {});
         } catch (e) {
             console.log(e);
         }
@@ -471,7 +472,7 @@ jQuery(document).ready(function ($) {
      * @param {string} message
      */
     function writeCalendarPrompt(calendar, message) {
-        let messagesContainer = $(calendar.parentNode).find('.availability-calendar-messages').get(0);
+        let messagesContainer = calendar.parentNode.querySelector('.availability-calendar-messages');
         if (undefined !== messagesContainer) {
             $(messagesContainer).empty();
             let messageContainer = document.createElement('p');
@@ -481,12 +482,12 @@ jQuery(document).ready(function ($) {
             window.setTimeout(function (element) {
                 // noinspection JSUnresolvedFunction
                 $(element).css('border-color', 'transparent');
-                window.setTimeout(function (element) {
+                window.setTimeout(function () {
                     // noinspection JSUnresolvedFunction
-                    $(element).removeClass('prompt-highlight');
-                    element.removeAttribute('style');
-                }, 1000, element);
-            }, 1500, messageContainer);
+                    $(messageContainer).removeClass('prompt-highlight');
+                    messageContainer.removeAttribute('style');
+                }, 1000);
+            }, 1500);
         }
     }
 
@@ -772,7 +773,7 @@ jQuery(document).ready(function ($) {
     }
 
     /**
-     * Highlights and deems input fields depending the calendar state.
+     * Highlights and deems input fields depending on the calendar state.
      *
      * @param {string} state
      * @param {HTMLElement} calendar
@@ -864,15 +865,14 @@ jQuery(document).ready(function ($) {
             let format = getCalendarDateFormat(calendar);
             let dates = getCalendarAvailability(calendar);
             let hideUnavailableRates = getCalendarParameter('hideUnavailableRates', calendar);
-            // noinspection JSUnresolvedFunction
-            $(calendar).find(
+            calendar.querySelectorAll(
                 '.ui-datepicker-calendar td.has-rate[class*="date-key-"] > *[class*="ui-state"]'
-            ).each(function () {
+            ).forEach(function (element) {
                 // extract date from css class
-                let date = extractDateFromCSSClasses(this.parentNode.className, format);
+                let date = extractDateFromCSSClasses(element.parentNode.className, format);
                 // extract rate data and check all conditions
                 if (
-                    (0 === $(this.parentNode).find('.rate').length)
+                    (0 === element.parentNode.querySelectorAll('.rate').length)
                     && (undefined !== date)
                     && hasDateData(date, dates)
                 ) {
@@ -893,13 +893,13 @@ jQuery(document).ready(function ($) {
                             let rateElement = document.createElement('span');
                             rateElement.className = hasOldRate ? 'rate new-rate' : 'rate';
                             rateElement.appendChild(document.createTextNode(rate));
-                            this.parentNode.appendChild(rateElement);
+                            element.parentNode.appendChild(rateElement);
                             // append old rate element to cell
                             if (hasOldRate) {
                                 let oldRateElement = document.createElement('span');
                                 oldRateElement.className = 'rate old-rate';
                                 oldRateElement.appendChild(document.createTextNode(oldRate));
-                                this.parentNode.appendChild(oldRateElement);
+                                element.parentNode.appendChild(oldRateElement);
                             }
                         }
                     }
@@ -908,14 +908,15 @@ jQuery(document).ready(function ($) {
             });
         }
         // handle context menu call
-        // noinspection JSUnresolvedFunction
-        $(calendar).find('.ui-datepicker-calendar td[title]').contextmenu(function (event) {
-            event.preventDefault();
-            try {
-                alert(this.getAttribute('title').replace(/\.\s?/gi, ".\n"));
-            } catch (e) {
-                console.log(e);
-            }
+        calendar.querySelectorAll('.ui-datepicker-calendar td[title]').forEach(function (cell) {
+            cell.addEventListener('contextmenu', function (event) {
+                event.preventDefault();
+                try {
+                    alert(this.getAttribute('title').replace(/\.\s?/gi, ".\n"));
+                } catch (e) {
+                    console.log(e);
+                }
+            });
         });
         // handle available date click when arrival / departure is not allowed
         if (active === getCalendarType(calendar)) {
@@ -927,9 +928,10 @@ jQuery(document).ready(function ($) {
             let message = (arrival === currentState) ?
                 availabilityCalendar.messages.alertNoArrivals
                 : availabilityCalendar.messages.alertNoDepartures;
-            // noinspection JSUnresolvedFunction
-            $(calendar).find(selector).on('click', function () {
-                alert(message);
+            calendar.querySelectorAll(selector).forEach(function (cell) {
+                cell.addEventListener('click', function () {
+                    alert(message);
+                });
             });
         }
     }
@@ -939,11 +941,11 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function lateUpdateCalendarCellData(calendar) {
-        window.setTimeout(function (calendar) {
+        window.setTimeout(function () {
             updateCalendarCellData(calendar);
             // apply nav-button accessibility attributes
             navButtonAccessibility(calendar);
-        }, 250, calendar);
+        }, 250);
     }
 
     /**
@@ -1079,7 +1081,7 @@ jQuery(document).ready(function ($) {
             // noinspection JSUnresolvedVariable
             messages.push(availabilityCalendar.messages.minimumStay.replace(
                 '{minimumStay}',
-                getMinStay(theDateString, this)
+                getMinStay(theDateString, this).toString()
             ));
             // handle availability message
             // noinspection JSUnresolvedVariable
@@ -1393,6 +1395,10 @@ jQuery(document).ready(function ($) {
      * @param {HTMLElement} calendar
      */
     function initiateCalendar(order, calendar) {
+        if (true === $(calendar).hasClass('hasDatepicker')) {
+            // noinspection JSUnresolvedFunction
+            $(calendar).datepicker('destroy');
+        }
         // populate calendar dates from inputs before drawing calendar
         updateCalendarFromInputs(calendar);
         // on init set calendar to 'arrival' state
@@ -1449,19 +1455,31 @@ jQuery(document).ready(function ($) {
         lateUpdateCalendarCellData(calendar);
     }
 
+    window.thsAvailabilityCalendar = {
+        initiateCalendar: function (calendar) {
+            initiateCalendar(0, calendar);
+        },
+        setInstancePayload: function (calendar, payload) {
+            let instance = getCalendarInstance(calendar);
+            if ('object' !== typeof availabilityCalendar.calendars) {
+                availabilityCalendar.calendars = {};
+            }
+            availabilityCalendar.calendars[instance] = payload;
+        }
+    };
+
     // pull out nav-button accessibility tweaks into reusable variable
     const navButtonAccessibility = function (calendar) {
-        // noinspection JSUnresolvedReference
-        $(calendar).find('.ui-datepicker-next, .ui-datepicker-prev').each(function () {
+        calendar.querySelectorAll('.ui-datepicker-next, .ui-datepicker-prev').forEach(function (button) {
             // add role="button" for accessibility
-            this.setAttribute('role', 'button');
+            button.setAttribute('role', 'button');
             // add title for accessibility
-            if (this.classList.contains('ui-datepicker-next')) {
+            if (button.classList.contains('ui-datepicker-next')) {
                 // noinspection JSUnresolvedReference
-                this.setAttribute('title', availabilityCalendar.messages.nextMonth);
+                button.setAttribute('title', availabilityCalendar.messages.nextMonth);
             } else {
                 // noinspection JSUnresolvedReference
-                this.setAttribute('title', availabilityCalendar.messages.previousMonth);
+                button.setAttribute('title', availabilityCalendar.messages.previousMonth);
             }
         });
     };
@@ -1470,7 +1488,8 @@ jQuery(document).ready(function ($) {
     // noinspection JSUnresolvedFunction
     $('.availability-calendar-clear .clear-button').on('click', function () {
         try {
-            let calendar = $($(this).closest('.availability-calendar-wrapper')[0]).find('.availability-calendar.hasDatepicker')[0];
+            let wrapper = this.closest('.availability-calendar-wrapper');
+            let calendar = (null === wrapper) ? undefined : wrapper.querySelector('.availability-calendar.hasDatepicker');
             if (undefined === calendar) {
                 return;
             }
@@ -1488,14 +1507,14 @@ jQuery(document).ready(function ($) {
     });
 
     // noinspection JSUnresolvedFunction
-    $('.availability-calendar').each(initiateCalendar);
+    $('.availability-calendar').not('[data-async="true"]').each(initiateCalendar);
 
     // noinspection JSUnresolvedFunction
     $(window).on('resize', function () {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function () {
             // noinspection JSUnresolvedFunction
-            $('.availability-calendar').each(function (order, calendar) {
+            $('.availability-calendar.hasDatepicker').each(function (order, calendar) {
                 // noinspection JSUnresolvedFunction
                 $(calendar).datepicker('option', 'numberOfMonths', fitCalendars(calendar));
                 // noinspection JSUnresolvedFunction
