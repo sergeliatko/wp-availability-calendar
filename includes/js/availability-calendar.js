@@ -1355,6 +1355,27 @@ jQuery(function ($) {
     }
 
     /**
+     * Recalculates the number of visible months for a single initialized calendar.
+     *
+     * @param {HTMLElement} calendar
+     */
+    function resizeCalendar(calendar) {
+        if (
+            null === calendar
+            || !calendar.classList
+            || ('function' !== typeof calendar.classList.contains)
+            || !calendar.classList.contains('hasDatepicker')
+        ) {
+            return;
+        }
+        // noinspection JSUnresolvedFunction
+        $(calendar).datepicker('option', 'numberOfMonths', fitCalendars(calendar));
+        // noinspection JSUnresolvedFunction
+        $(calendar).datepicker('refresh');
+        lateUpdateCalendarCellData(calendar);
+    }
+
+    /**
      * Clears calendar dates.
      *
      * @param {HTMLDivElement} calendar
@@ -1459,6 +1480,9 @@ jQuery(function ($) {
         initiateCalendar: function (calendar) {
             initiateCalendar(0, calendar);
         },
+        resizeCalendar: function (calendar) {
+            resizeCalendar(calendar);
+        },
         setInstancePayload: function (calendar, payload) {
             let instance = getCalendarInstance(calendar);
             if ('object' !== typeof availabilityCalendar.calendars) {
@@ -1515,11 +1539,7 @@ jQuery(function ($) {
         resizeTimer = setTimeout(function () {
             // noinspection JSUnresolvedFunction
             $('.availability-calendar.hasDatepicker').each(function (order, calendar) {
-                // noinspection JSUnresolvedFunction
-                $(calendar).datepicker('option', 'numberOfMonths', fitCalendars(calendar));
-                // noinspection JSUnresolvedFunction
-                $(calendar).datepicker('refresh');
-                lateUpdateCalendarCellData(calendar);
+                resizeCalendar(calendar);
             });
         }, 250);
     });
